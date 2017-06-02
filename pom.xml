@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.pard</groupId>
+    <artifactId>pard-isocca</artifactId>
+    <version>1.0.0.0</version>
+
+    <packaging>jar</packaging>
+
+    <name>Pard ISOCCA</name>
+    <description>Integrated system of criminal characteristics acquisition</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.3.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
+        <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
+        <thymeleaf-extras-springsecurity4.version>3.0.2.RELEASE</thymeleaf-extras-springsecurity4.version>
+        <java.version>1.8</java.version>
+
+        <guava.version>20.0-rc1</guava.version>
+        <commons-lang3.version>3.4</commons-lang3.version>
+    </properties>
+
+
+</project>
