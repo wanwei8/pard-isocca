@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>菜单管理</title>
+    <link rel="stylesheet" th:href="@{/components/ztree/css/zTreeStyle/zTreeStyle.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <form th:object="${menu}" method="post" id="edtForm" class="form-horizontal" role="form">
+            <input type="hidden" name="id" th:value="*{id}"/>
+            <input type="hidden" id="parentId" name="parent.id" th:value="*{parent.id}"/>
+            <input type="hidden" id="icon" name="icon" th:value="*{icon}"/>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">父菜单<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <span class="block input-icon input-icon-right">
+                        <input type="text" class="form-control required" th:value="*{parent.name}" id="parentName"
+                               name="parent.name" placeholder="父菜单"/>
+                        <i class="ace-icon fa fa-angle-down light"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">父菜单</label>
+                <div class="col-sm-6">
+                    <select id="parent" class="form-control select2"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">显示名称<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control required" maxlength="50" th:value="*{name}" id="name"
+                           name="name" placeholder="显示名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">菜单是否可见<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select id="isShow" name="isShow" th:value="*{isShow}" class="form-control required"
+                            data-placeholder="请选取...">
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">排序<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control required integer" maxlength="50" th:value="*{sort}" id="sort"
+                           name="sort" placeholder="排序"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">Web链接地址</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" maxlength="1000" th:value="*{href}" id="href"
+                           name="href" placeholder="Web链接地址"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">权限标识</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" maxlength="200" th:value="*{permission}" id="permission"
+                           name="permission" placeholder="权限标识"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">Web图标</label>
+                <div class="col-sm-6">
+                    <i id="iconDisp" th:class="'ace-icon ' + ${menu.icon} ?: 'hide'" style="font-size:22px"></i>
+                    <button class="btn btn-link" type="button" id="selIcon">选择图标</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="treeContent" class="tree-select">
+    <ul id="tree" class="ztree"></ul>
+</div>
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/ztree/js/jquery.ztree.all.min.js}"></script>
+<script th:src="@{/components/select2/js/select2.full.js}"></script>
+<script th:src="@{/components/select2/js/select2tree.js}"></script>
+<script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    var refershParent;
+    function doSubmit(callback) {
+        if (validateForm.form()) {
+            refershParent = callback;
+            $("#edtForm").submit();
+        }
+        return false;
+    }
+    $(function () {
+        initPageScript();
+//        bindTree();
+        bindSelect2Tree();
+        bindSelIcon();
+        buildSelect([[${menu.isShow}]]);
+        validateForm = $("#edtForm").validate({
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/menu/'}]]*/ "/api/sys/menu/",
+                    type: "POST",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 100) {
+                            if (typeof refershParent === "function") {
+                                refershParent([[${menu.parent.id}]]);
+                            }
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                    }
+                })
+            },
+
+        })
+    });
+</script>
+<script type="text/javascript">
+    function bindSelect2Tree() {
+        $.ajax({
+            type: "post",
+            url: ctxApi + "/sys/menu/select2tree?all=1",
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                $.each(data, function (i, item) {
+                    var html = '<option value="' + item.id + '" parent="' + item.parent + '">' + item.text + '</option>';
+                    $("#parent").append(html);
+                });
+                $('#parent').select2tree();
+            }
+        });
+        $('#parent').select2tree();
+    }
+    function bindTree() {
+        $('.ztree').width($('#parentName').width());
+        var treeUrl = ctxApi + "/sys/menu/tree?all=1";
+        var pid = $('#parentId').val() || '';
+        bindZtree('tree', treeUrl, treeOnClick, true, pid);
+        $('#parentName').on('click select', function () {
+            showTree();
+        });
+    }
+    function showTree() {
+        var input = $('#parentName');
+        var inputOffset = input.offset();
+        $('#treeContent').css({
+            left: inputOffset.left + 'px',
+            top: input.outerHeight() + 'px',
+            width: input.width + 'px'
+        }).slideDown('fast');
+        $('.page-content').bind('click', onBodyDown);
+        input.addClass('tree-container-active');
+        $('.fa-angle-down').removeClass('fa-angle-down').addClass('fa-angle-up');
+    }
+    function hideTree() {
+        $('#treeContent').fadeOut('fast');
+        $('#parentName').removeClass('tree-container-active');
+        $('.fa-angle-up').addClass('fa-angle-down').removeClass('fa-angle-up');
+        $('.page-content').unbind('click', onBodyDown);
+    }
+    function onBodyDown(event) {
+        if (!(event.target.id == 'parentName' || event.target.id == 'treeContent' || $(event.target).parents('#treeContent').length > 0)) {
+            hideTree();
+        }
+    }
+    function treeOnClick(id, name) {
+        $("#parentId").val(id);
+        $("#parentName").val(name);
+    }
+    function selectTreeNode() {
+        var pid = $('#parentId').val() || '';
+        if (pid.length > 0) {
+            var treeObj = $.fn.zTree.getZTreeObj('tree');
+            var node = treeObj.getNodeByTId(pid);
+            if (node != null) {
+                treeObj.selectNode(node);
+            }
+        }
+    }
+
+    function bindSelIcon() {
+        $('#selIcon').on('click', function () {
+            var sel = $('#icon').val();
+            var url = ctxAdmin + '/sys/menu/icon?sel=' + sel;
+            top.layer.open({
+                type: 2,
+                area: ["1000px", "630px"],
+                title: "选取图标",
+                content: url,
+                success: function (layero, index) {
+                    var pid = top.layer.getFrameIndex(window.name);
+                    var body = top.layer.getChildFrame('body', index);
+                    body.find('#parentId').val(pid);
+                }
+            });
+        });
+    }
+    function buildSelect(val) {
+        var url = ctxApi + "/sys/dict/dict?type=yes_no";
+        bindSelect('isShow', url, val);
+    }
+</script>
+</body>

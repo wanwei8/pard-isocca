@@ -1,0 +1,170 @@
+<! DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>数据选择</title>
+    <link rel="stylesheet" th:href="@{/components/ztree/css/metroStyle/metroStyle.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <div id="tree" class="ztree"></div>
+    </div>
+</div>
+
+<th:block th:replace="include/dialog_template :: javascript"/>
+
+<script th:src="@{/components/ztree/js/jquery.ztree.all.min.js}"></script>
+
+<script th:inline="javascript">
+    var key, lastValue = "", nodeList = [], type = getQueryString("type", [[${url}]]);
+    var tree, setting = {
+        view: {
+            selectMuti: false,
+            dbClickExpand: false,
+        },
+        check: {
+            enable: [[${checked}]],
+            nocheckInherit: true
+        },
+        async: {
+            enable: (type == 3),
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onClick: function (event, treeId, treeNode) {
+                tree.expandNode(treeNode);
+            }, onCheck: function (e, treeId, treeNode) {
+                var nodes = tree.getCheckedNodes(true);
+                for (var i = 0, l = nodes.length; i < l; i++) {
+                    tree.expandNode(nodes[i], true, false, false);
+                }
+                return false;
+            }, onAsyncSuccess: function (event, treeId, treeNode, msg) {
+                var nodes = tree.getNodesByParam("pId", treeNode.id, null);
+                for (var i = 0, l = nodes.length; i < l; i++) {
+                    try {
+                        tree.checkNode(nodes[i], treeNode.checked, true);
+                    } catch (e) {
+                    }
+                }
+                selectCheckNode();
+            }, onDblClick: function () {
+                var btn = $(".layui-layer-btn0", parent.document);
+                var index = top.layer.getFrameIndex(window.name) - 1;
+                if (btn.length > 0) {
+                    btn[index].click();
+                }
+            }
+        }
+    }
+
+    function expandNodes(nodes) {
+        if (!nodes) return;
+        for (var i = 0, l = nodes.length; i < l; i++) {
+            tree.expandNode(nodes[i], true, false, false);
+            if (nodes[i].isParent && nodes[i].zAsync) {
+                expandNodes(nodes[i].children);
+            }
+        }
+    }
+
+    var url = encodeURI([[${uri}]]);
+    $(document).ready(function () {
+        $.get(url, function (zNodes) {
+            // 初始化树结构
+            tree = $.fn.zTree.init($("#tree"), setting, zNodes);
+
+            // 默认展开一级节点
+            var nodes = tree.getNodesByParam("level", 0);
+            for (var i = 0; i < nodes.length; i++) {
+                tree.expandNode(nodes[i], true, false, false);
+            }
+            //异步加载子节点（加载用户）
+            var nodesOne = tree.getNodesByParam("isParent", true);
+            for (var j = 0; j < nodesOne.length; j++) {
+                tree.reAsyncChildNodes(nodesOne[j], "!refresh", true);
+            }
+            selectCheckNode();
+        }, "json");
+    });
+
+    // 默认选择节点
+    function selectCheckNode() {
+        var ids = "${selectIds}".split(",");
+        for (var i = 0; i < ids.length; i++) {
+            var node = tree.getNodeByParam("id", (type == 3 ? "u_" : "") + ids[i]);
+            if ("${checked}" == "true") {
+                try {
+                    tree.checkNode(node, true, true);
+                } catch (e) {
+                }
+                tree.selectNode(node, false);
+            } else {
+                tree.selectNode(node, true);
+            }
+        }
+    }
+    function focusKey(e) {
+        if (key.hasClass("empty")) {
+            key.removeClass("empty");
+        }
+    }
+    function blurKey(e) {
+        if (key.get(0).value === "") {
+            key.addClass("empty");
+        }
+        searchNode(e);
+    }
+
+    //隐藏所有节点
+    function hideAllNode(nodes) {
+        nodes = tree.transformToArray(nodes);
+        for (var i = nodes.length - 1; i >= 0; i--) {
+            tree.hideNode(nodes[i]);
+        }
+    }
+
+    //显示所有节点
+    function showAllNode(nodes) {
+        nodes = tree.transformToArray(nodes);
+        for (var i = nodes.length - 1; i >= 0; i--) {
+            /* if(!nodes[i].isParent){
+             tree.showNode(nodes[i]);
+             }else{ */
+            if (nodes[i].getParentNode() != null) {
+                tree.expandNode(nodes[i], false, false, false, false);
+            } else {
+                tree.expandNode(nodes[i], true, true, false, false);
+            }
+            tree.showNode(nodes[i]);
+            showAllNode(nodes[i].children);
+            /* } */
+        }
+    }
+
+    //更新节点状态
+    function updateNodes(nodeList) {
+        tree.showNodes(nodeList);
+        for (var i = 0, l = nodeList.length; i < l; i++) {
+
+            //展开当前节点的父节点
+            tree.showNode(nodeList[i].getParentNode());
+            //tree.expandNode(nodeList[i].getParentNode(), true, false, false);
+            //显示展开符合条件节点的父节点
+            while (nodeList[i].getParentNode() != null) {
+                tree.expandNode(nodeList[i].getParentNode(), true, false, false);
+                nodeList[i] = nodeList[i].getParentNode();
+                tree.showNode(nodeList[i].getParentNode());
+            }
+            //显示根节点
+            tree.showNode(nodeList[i].getParentNode());
+            //展开根节点
+            tree.expandNode(nodeList[i].getParentNode(), true, false, false);
+        }
+    }
+</script>
+</body>

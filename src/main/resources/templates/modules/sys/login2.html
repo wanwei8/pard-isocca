@@ -1,0 +1,24 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<title>登录</title>
+
+<div id='div1'></div>
+
+<script type="text/javascript">
+    //设定倒数秒数
+    var t = 10;
+    //显示倒数秒数
+    function showTime() {
+        t -= 1;
+        document.getElementById('div1').innerHTML = t;
+        if (t == 0) {
+            location.href = /*[[@{/login}]]*/'/login';
+        }
+//每秒执行一次,showTime()
+        setTimeout("showTime()", 1000);
+    }
+    //执行showTime()
+    showTime();
+</script>
+
+</html>

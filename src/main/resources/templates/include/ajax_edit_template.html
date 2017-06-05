@@ -1,0 +1,9 @@
+<thymeleaf xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <head th:fragment="common_header(title,links)" th:remove="tag">
+        <title th:replace="${title}">TITLE</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <th:block th:replace="${links} ?: ~{}"/>
+    </head>
+
+</thymeleaf>

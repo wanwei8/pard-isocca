@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>区域管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <form id="inputForm" class="form-horizontal" role="form" th:object="${area}">
+            <input type="hidden" name="id" th:value="*{id}"/>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="parent">上级区域<span
+                        class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select type="text" class="form-control required" th:value="*{parent.id}" id="parent"
+                            name="parent.id" placeholder="上级区域">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="name">区域名称<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" id="name" name="name" th:value="*{name}" placeholder="区域名称" maxlength="50"
+                           class="form-control required"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="code">区域编码<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" id="code" name="code" th:value="*{code}" placeholder="区域编码" maxlength="50"
+                           class="form-control required"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="type">区域类型<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select id="type" name="type" th:value="*{type}" class="select2 form-control required"
+                            data-placeholder="请选取...">
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="sort">排序<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" id="sort" name="sort" th:value="*{sort}" placeholder="排序"
+                           class="form-control required integer"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="remarks">备注</label>
+                <div class="col-sm-6">
+                        <textarea class="form-control" id="remarks" name="remarks" th:value="*{remarks}"
+                                  placeholder="备注" maxlength="200" rows="3"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="treeContent" class="tree-select">
+    <ul id="tree" class="ztree"></ul>
+</div>
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/select2/js/select2.full.js}"></script>
+<script th:src="@{/components/select2/js/select2tree.js}"></script>
+<script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    var refershParent;
+    function doSubmit(callback) {
+        if (validateForm.form()) {
+            refershParent = callback;
+            $("#inputForm").submit();
+        }
+        return false;
+    }
+    jQuery(function () {
+        initPageScript();
+        buildSelect([[${area.type}]]);
+        select2TreeParent([[${area.parent.id}]]);
+        $("#name").focus();
+
+        validateForm = $("#inputForm").validate({
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/area/'}]]*/ "/api/sys/area/",
+                    type: "POST",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 100) {
+                            if (typeof refershParent === "function") {
+                                refershParent([[${area.parent.id}]]);
+                            }
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                    }
+                });
+            },
+        });
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    function buildSelect(val) {
+        var url = ctxApi + "/sys/dict/dict?type=sys_area_type";
+        bindSelect('type', url, val);
+    }
+    function select2TreeParent(pid, extid) {
+        extid = extid || '';
+        var url = ctxApi + "/sys/area/select2tree?all=1&extId=" + extid;
+        bindSelect2Tree('parent', url, pid);
+    }
+</script>
+</body>
+</html>

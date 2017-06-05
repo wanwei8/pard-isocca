@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>组织机构管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <form id="inputForm" class="form-horizontal" role="form" th:object="${office}">
+            <input type="hidden" name="id" th:value="*{id}"/>
+            <div class="tabbable">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a data-toggle="tab" href="#homeTab">基础信息</a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#addressTab">通讯信息</a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#otherTab">其它信息</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div id="homeTab" class="tab-pane in active">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="name">机构名称<span class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <input type="text" id="name" name="name" th:value="*{name}" placeholder="机构名称"
+                                   maxlength="50"
+                                   class="form-control required"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="parent">上级机构<span
+                                class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <select type="text" class="form-control required" th:value="*{parent.id}" id="parent"
+                                    name="parent.id" placeholder="上级机构">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="area">归属区域<span class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <select type="text" class="form-control required" th:value="*{area.id}" id="area"
+                                    name="area.id" placeholder="归属区域">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="code">机构编码</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="code" name="code" th:value="*{code}" placeholder="机构编码"
+                                   maxlength="50"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="type">机构分类<span class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <select id="type" name="type" th:value="*{type}" class="select2 form-control required"
+                                    data-placeholder="请选取...">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="grade">机构等级<span
+                                class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <select id="grade" name="grade" th:value="*{grade}" class="select2 form-control required"
+                                    data-placeholder="请选取...">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="sort">排序<span
+                                class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <input type="text" id="sort" name="sort" th:value="*{sort}" placeholder="排序"
+                                   class="form-control required integer"/>
+                        </div>
+                    </div>
+                </div>
+                <div id="addressTab" class="tab-pane">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="address">机构地址</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="address" name="address" th:value="*{address}" placeholder="机构地址"
+                                   class="form-control" maxlength="100"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="address">邮政编码</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="zipCode" name="zipCode" th:value="*{zipCode}" placeholder="邮政编码"
+                                   class="form-control" maxlength="50"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="master">负责人</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="master" name="master" th:value="*{master}" placeholder="负责人"
+                                   maxlength="50"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="phone">联系电话</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="phone" name="phone" th:value="*{phone}" placeholder="联系电话"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="fax">传真</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="fax" name="fax" th:value="*{fax}" placeholder="传真"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="email">电子邮箱</label>
+                        <div class="col-sm-6">
+                            <input type="text" id="email" name="email" th:value="*{email}" placeholder="电子邮箱"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div id="otherTab" class="tab-pane">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="useable">是否有效<span
+                                class="red">*</span></label>
+                        <div class="col-sm-6">
+                            <select id="useable" name="useable" th:value="*{useable}"
+                                    class="select2 form-control required"
+                                    data-placeholder="请选取...">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="remarks">备注</label>
+                        <div class="col-sm-6">
+                        <textarea class="form-control" id="remarks" name="remarks" th:value="*{remarks}"
+                                  placeholder="备注" maxlength="200" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/select2/js/select2.full.js}"></script>
+<script th:src="@{/components/select2/js/select2tree.js}"></script>
+<script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    var refershParent;
+    function doSubmit(callback) {
+        if (validateForm.form()) {
+            refershParent = callback;
+            $("#inputForm").submit();
+        }
+        return false;
+    }
+    jQuery(function () {
+        initPageScript();
+        buildSelect('type', 'sys_office_type', [[${office.type}]]);
+        buildSelect('useable', 'yes_no', [[${office.useable}]]);
+        buildSelect('grade', 'sys_office_grade', [[${office.grade}]]);
+        select2TreeParent([[${office.parent.id}]], [[${office.id}]]);
+        select2TreeArea([[${office.area.id}]]);
+        $("#name").focus();
+
+        validateForm = $("#inputForm").validate({
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/office/'}]]*/ "/api/sys/office/",
+                    type: "POST",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 100) {
+                            if (typeof refershParent === "function") {
+                                refershParent([[${office.parent.id}]]);
+                            }
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                    }
+                });
+            },
+        });
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    function buildSelect(control, type, val) {
+        var url = ctxApi + "/sys/dict/dict?type=" + type;
+        bindSelect(control, url, val);
+    }
+    function select2TreeParent(pid, extid) {
+        extid = extid || '';
+        var url = ctxApi + "/sys/office/select2tree?all=1&extId=" + extid;
+        bindSelect2Tree('parent', url, pid);
+    }
+    function select2TreeArea(pid) {
+        var url = ctxApi + "/sys/area/select2tree";
+        bindSelect2Tree('area', url, pid);
+    }
+</script>
+</body>
+</html>

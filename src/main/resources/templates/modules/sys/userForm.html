@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>用户管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <div class="tabbable">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab" href="#homeTab">基础信息</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#addressTab">用户可操作功能</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#otherTab">所属机构角色</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#photoTab">肖像信息</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div id="homeTab" class="tab-pane in active">
+                <form id="inputForm" class="form-horizontal" role="form" th:object="${user}">
+                    <input type="hidden" name="id" th:value="*{id}"/>
+                    <input type="hidden" name="oldName" th:value="*{loginName}"/>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="loginName">用户名/登录名<span
+                                        class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="loginName" name="loginName" th:value="*{loginName}"
+                                           placeholder="用户名/登录名" maxlength="50"
+                                           class="form-control required"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="name">真实姓名<span class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="name" name="name" th:value="*{name}" placeholder="真实姓名"
+                                           maxlength="50"
+                                           class="form-control required"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="company">所属公司<span
+                                        class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <select id="company" name="company.id" th:value="*{company.id}"
+                                            class="form-control required select2-single"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="company">所属部门<span
+                                        class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <select id="office" name="office.id" th:value="*{office.id}"
+                                            class="form-control required select2-single"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="no">用户编码<span
+                                        class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="no" name="no" th:value="*{no}" placeholder="用户编码"
+                                           maxlength="50"
+                                           class="form-control required"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="company">职务头衔</label>
+                                <div class="col-sm-8">
+                                    <select id="duties" name="duties" th:value="*{duties}"
+                                            class="form-control select2"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="newPassword">密码<span
+                                        class="red" th:if="${#strings.isEmpty(user.id)}">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="password" id="newPassword" name="newPassword" value="" placeholder="密码"
+                                           maxlength="50" minlength="5"
+                                           class="form-control"
+                                           th:class="'form-control ' + ${#strings.isEmpty(user.id) ? 'required' : ''}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right"
+                                       for="confireNewPassword">确认密码<span class="red"
+                                                                          th:if="${#strings.isEmpty(user.id)}">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="password" id="confireNewPassword" name="confireNewPassword" value=""
+                                           placeholder="确认密码"
+                                           maxlength="50" minlength="5" equalTo="#newPassword" class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="phone">办公电话</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="phone" name="phone" th:value="*{phone}" placeholder="办公电话"
+                                           maxlength="100"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="mobile">移动电话</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="mobile" name="mobile" th:value="*{mobile}" placeholder="移动电话"
+                                           maxlength="100"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="email">邮件地址</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="email" name="email" th:value="*{email}" placeholder="邮件地址"
+                                           maxlength="100"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="fax">传真</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="fax" name="fax" th:value="*{fax}" placeholder="传真"
+                                           maxlength="100"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="loginFlag">是否允许登录<span
+                                        class="red">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="loginFlag" name="loginFlag" th:value="*{loginFlag}"
+                                           placeholder="是否允许登录" maxlength="50"
+                                           class="form-control required"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label no-padding-right" for="genderMan">性别</label>
+                                <div class="col-sm-8">
+                                    <div class="radio">
+                                        <label>
+                                            <input th:field="*{gender}" id="genderMan" name="gender" type="radio"
+                                                   class="ace" value="1">
+                                            <span class="lbl">男</span>
+                                        </label>
+                                        <label>
+                                            <input th:field="*{gender}" id="genderWoman" name="gender" type="radio"
+                                                   class="ace" value="0">
+                                            <span class="lbl">女</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-xs-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label no-padding-right" for="remarks">备注</label>
+                                <div class="col-sm-10">
+                                    <textarea id="remarks" name="remarks" th:value="*{remarks}" placeholder="备注"
+                                              rows="3" class="form-control">
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="addressTab" class="tab-pane">
+
+            </div>
+            <div id="otherTab" class="tab-pane">
+
+            </div>
+            <div id="photoTab" class="tab-pane">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <form class="dropzone well">
+                            <div class="fallback">
+                                <input name="photo" type="file"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/select2/js/select2.full.js}"></script>
+<script th:src="@{/components/select2/js/select2tree.js}"></script>
+<script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
+<script th:src="@{/components/treeSelect/jquery.treeSelect.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    var refershParent;
+    function doSubmit(callback) {
+        if (validateForm.form()) {
+            refershParent = callback;
+            $("#inputForm").submit();
+        }
+        return false;
+    }
+    $(function () {
+        initPageScript();
+        select2Company([[${user.company.id}]], [[${user.office.id}]]);
+        buildSelect('duties', 'sys_duties', [[${user.duties}]]);
+        buildSelect('loginFlag', 'yes_no', [[${user.loginFlag}]]);
+        validateForm = $("#inputForm").validate({
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/user/'}]]*/ "/api/sys/user/",
+                    type: "POST",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 100) {
+                            if (typeof refershParent === "function") {
+                                refershParent([[${user.office.id}]]);
+                            }
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                    }
+                });
+            },
+        });
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    function select2Company(pid, oid) {
+        var url = ctxApi + "/sys/office/select2company";
+        bindSelect('company', url, pid);
+        $('#company').on('change', function (e) {
+            var cid = $('#company').val();
+            select2Office(cid, oid);
+        });
+    }
+    function select2Office(cid, oid) {
+        cid = cid || '';
+        oid = oid || '';
+        var url = ctxApi + "/sys/office/select2office?company=" + cid;
+        bindSelect2Tree('office', url, oid);
+    }
+    function buildSelect(control, type, val) {
+        var url = ctxApi + "/sys/dict/dict?type=" + type;
+        bindSelect(control, url, val);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<thymeleaf xmlns:th="http://www.thymeleaf.org">
+    <!--树形列表控件-->
+    <div th:fragment="selectTree(id, name, value, labelName, labelValue, placeholder, css, divCss)" th:remove="tag">
+        <input th:id="${id}" th:name="${name}" type="hidden" th:value="${value} ?: ''"/>
+        <div th:class="${(divCss ?: '') + ' input-group'}">
+            <input th:id="${id + 'Name'}" th:name="${labelName}" type="text" th:value="${labelValue} ?: ''"
+                   th:class="${(css ?: '') + ' form-control'}" readonly="readonly"
+                   th:placeholder="${placeholder ?: ''}"/>
+            <span class="input-group-btn">
+                <button type="button" th:id="${id + 'Button'}" class="btn btn-sm btn-success">
+                    <i class="fa fa-search"></i>
+                </button>
+	        </span>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        $("${'#' + id + 'Button'}, ${'#' + id + 'Name'}").click(function () {
+            // 是否限制选择，如果限制，设置为disabled
+            if ($("${'#' + id + 'Button'}").hasClass("disabled")) {
+                return true;
+            }
+            // 正常打开
+            /*top.layer.open({
+             type: 2,
+             area: ['300px', '420px'],
+             title:"选择${title}",
+             ajaxData:{selectIds: $("${'#' + id}").val()},
+             //content: "${ctxAdmin}/tag/treeSelect?url="+encodeURIComponent("${url}")+"&model=${model}&checked=${checked}&extId=${extId}&parent="+parentId+"&isAll=${isAll}" ,
+             btn: ['确定', '关闭 ${allowClear?"','清除":""}']
+             ,yes : function(index, layero){ //或者使用btn1
+             var tree = layero.find("iframe")[0].contentWindow.tree;//h.find("iframe").contents();
+             var ids = [], names = [], nodes = [];
+             if ("${checked}" == "true"){
+             nodes = tree.getCheckedNodes(true);
+             }else{
+             nodes = tree.getSelectedNodes();
+             }
+             for(var i=0; i<nodes.length; i++) {//
+             <c:if test="${checked && notAllowSelectParent}">
+             if (nodes[i].isParent){
+             continue; // 如果为复选框选择，则过滤掉父节点
+             }
+             </c:if>	<c:if test="${notAllowSelectRoot}">
+             if (nodes[i].level == 0){
+             top.layer.msg("不能选择根节点（"+nodes[i].name+"）请重新选择。");
+             return false;
+             }//
+             </c:if> <c:if test="${notAllowSelectParent}">
+             if (nodes[i].isParent){
+             top.layer.msg("不能选择父节点（"+nodes[i].name+"）请重新选择。");
+             return false;
+             }//
+             </c:if>	<c:if test="${not empty model && selectScopeModel}">
+             if (nodes[i].model == ""){
+             top.layer.msg("不能选择公共模型（"+nodes[i].name+"）请重新选择。");
+             return false;
+             }else if (nodes[i].model != "${model}"){
+             top.layer.msg("不能选择当前栏目以外的栏目模型，请重新选择。");
+             return false;
+             }//
+             </c:if>
+             ids.push(nodes[i].id);
+             names.push(nodes[i].name);//
+             break; // 如果为非复选框选择，则返回第一个选择
+             }
+             $("#${id}").val(ids.join(",").replace(/u_/ig,"")).change();
+             $("#${id}Name").val(names.join(","));
+             $("#${id}Name").focus();
+             top.layer.close(index);
+             },cancel: function(index){ //或者使用btn2
+             //按钮【按钮二】的回调
+             },btn3: function(index, layero){
+             //按钮【按钮三】的回调
+             $("#${id}").val("");
+             $("#${id}Name").val("");
+             top.layer.close(index);
+             }
+             });*/
+        });
+    </script>
+</thymeleaf>

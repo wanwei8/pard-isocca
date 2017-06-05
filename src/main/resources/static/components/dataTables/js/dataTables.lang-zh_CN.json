@@ -1,0 +1,24 @@
+{
+  "sEmptyTable": "表格中没有数据~",
+  "sInfo": "显示 _START_ 到 _END_ 条数据，共 _TOTAL_ 条数据。",
+  "sInfoEmpty": "没有数据~",
+  "sInfoPostFix": "",
+  "sInfoThousands": ",",
+  "sInfoFiltered": "(从 _MAX_ 条记录过滤)。",
+  "sLoadingRecords": "正在加载，请稍后...",
+  "sProcessing": "正在处理，请稍后...",
+  "sSearch": "查询:",
+  "sZeroRecords": "没有找到对应的数据",
+  "lengthMenu": "显示 _MENU_ 条数据",
+  "oPaginate": {
+    "sFirst": "首页",
+    "sPrevious": "上一页",
+    "sNext": "下一页",
+    "sLast": "末页",
+    "sJump": "跳转"
+  },
+  "oAria": {
+    "sSortAscending": "：以升序排序此列",
+    "sSortDescending": "：以降序排序此列"
+  }
+}

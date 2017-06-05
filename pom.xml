@@ -113,6 +113,19 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
+        <!--时间解析-->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.7</version>
+        </dependency>
+        <!--中文转拼音-->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.0</version>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>com.github.axet</groupId>
             <artifactId>kaptcha</artifactId>
@@ -133,7 +146,6 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <fork>true</fork>
-                    <executable>true</executable>
                 </configuration>
             </plugin>
         </plugins>

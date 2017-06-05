@@ -1,0 +1,502 @@
+.dataTable td {
+    vertical-align: middle !important;
+}
+
+.toolbar {
+    float: left;
+    margin-bottom: 5px;
+}
+
+/* 单元格连续纯字母数字强制换行显示 */
+.wordwrap {
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+/* 超长文字单元格省略号显示 */
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+.readonly {
+    background: #FFF;
+    color: #858585;
+}
+
+.scrollable {
+    overflow-x: auto;
+}
+
+.tree-container-active {
+    border: 1px solid #5897fb;
+}
+
+.tree-select {
+    display: none;
+    position: absolute;
+    z-index: 999;
+}
+
+.tree-select .ztree {
+    margin-top: 10px;
+    border: 1px solid #d2d2d2;
+    background: #fff;
+    width: 220px;
+    height: 300px;
+    overflow-y: scroll;
+    overflow-x: auto;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12);
+    box-sizing: border-box;
+}
+
+.bs-icons {
+    margin: 0 -10px 0px;
+    overflow: hidden;
+}
+
+.bs-icons-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.bs-icons li {
+    float: left;
+    width: 58px;
+    height: 58px;
+    padding: 10px;
+    line-height: 1.4;
+    text-align: center;
+    background-color: #f9f9f9;
+    border: 1px solid #fff;
+    vertical-align: middle;
+    display: inline;
+}
+
+.bs-icons li a {
+    display: inline-block;
+}
+
+.bs-icons li span {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 24px;
+    display: inline-block;
+}
+
+.bs-icons li:hover {
+    color: #fff;
+    background-color: #7aa1b4;
+}
+
+.bs-icons .icon-class {
+    display: block;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.dropdown-menu li form a {
+    font-size: 13px;
+    padding-left: 11px;
+    padding-right: 11px;
+    padding-bottom: 4px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
+
+.dropdown-menu li:hover form a,
+.dropdown-menu li form a:focus,
+.dropdown-menu li.active form a,
+.dropdown-menu li.active:hover form a {
+    background: #fee188;
+    color: #444444;
+}
+
+.dropdown-menu li form a:focus, .dropdown-menu li form a:hover {
+    text-decoration: none;
+}
+
+.dropdown-menu li form a {
+    display: block;;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    white-space: nowrap;
+    color: #333;
+}
+
+.user-menu li form a {
+    padding: 4px 12px;
+}
+
+.user-menu li form a .ace-icon {
+    margin-right: 6px;
+    font-size: 120%;
+}
+
+.darkpink {
+    color: #e798ba !important;
+}
+
+.darkpink:active, .darkpink:focus {
+    color: #edb2cb !important;
+}
+
+.lightpink {
+    color: #fa6374 !important;
+}
+
+.lightpink:active, .lightpink:focus {
+    color: #fb8a97 !important;
+}
+
+.darkorange {
+    color: #ba6200 !important;
+}
+
+.darkorange:active, .darkorange:focus {
+    color: #cb8940 !important;
+}
+
+.orangeplus {
+    color: #fc7736 !important;
+}
+
+.orangeplus:active, .orangeplus:focus {
+    color: #fd9968 !important;
+}
+
+.orange {
+    color: #d35400 !important;
+}
+
+.orange:active, .orange:focus {
+    color: #de7f40 !important;
+}
+
+.orangelight {
+    color: #f7941d !important;
+}
+
+.orangelight:active, .orangelight:focus {
+    color: #f9af56 !important;
+}
+
+.orangelightplus {
+    color: #f39c12 !important;
+}
+
+.orangelightplus:active, .orangelightplus:focus {
+    color: #f6b54d !important;
+}
+
+.orangeblind {
+    color: #f8b243 !important;
+}
+
+.orangeblind:active, .orangeblind:focus {
+    color: #fac572 !important;
+}
+
+.yellow {
+    color: #f3cf3f !important;
+}
+
+.yellow:active, .yellow:focus {
+    color: #f6db6f !important;
+}
+
+.muddygreen {
+    color: #9e9a27 !important;
+}
+
+.muddygreen:active, .muddygreen:focus {
+    color: #ada563 !important;
+}
+
+.muddygreenplus {
+    color: #a9baa2 !important;
+}
+
+.muddygreenplus:active, .muddygreenplus:focus {
+    color: #bfcbb9 !important;
+}
+
+.green {
+    color: #01b169 !important;
+}
+
+.green:active, .green:focus {
+    color: #62d995 !important;
+}
+
+.greenplus {
+    color: #16a085 !important;
+}
+
+.greenplus:active, .greenplus:focus {
+    color: #50b8a4 !important;
+}
+
+.anothergreen {
+    color: #52be7f !important;
+}
+
+.anothergreen:active, .anothergreen:focus {
+    color: #7dce9f !important;
+}
+
+.lightgreen {
+    color: #82d8b5 !important;
+}
+
+.lightgreen:active, .lightgreen:focus {
+    color: #a1e2c8 !important;
+}
+
+.lightgreenplus {
+    color: #47c9af !important;
+}
+
+.lightgreenplus:active, .lightgreenplus:focus {
+    color: #75d7c3 !important;
+}
+
+.lightgreentwoplus {
+    color: #5aada2 !important;
+}
+
+.lightgreentwoplus:active, .lightgreentwoplus:focus {
+    color: #83c2b9 !important;
+}
+
+.darkgreen {
+    color: #8ba987 !important;
+}
+
+.darkgreen:active, .darkgreen:focus {
+    color: #bfcbb9 !important;
+}
+
+.darkgreenplus {
+    color: #067a6b !important;
+}
+
+.darkgreenplus:active, .darkgreenplus:focus {
+    color: #449b90 !important;
+}
+
+.lightred {
+    color: #f26c63 !important;
+}
+
+.lightred:active, .lightred:focus {
+    color: #f5918a !important;
+}
+
+.red {
+    color: #e74c3c !important;
+}
+
+.red:active, .red:focus {
+    color: #ed796d !important;
+}
+
+.muddyred {
+    color: #cc6055 !important;
+}
+
+.muddyred:active, .muddyred:focus {
+    color: #d98880 !important;
+}
+
+.lime {
+    color: #cfe374 !important;
+}
+
+.lime:active, .lime:focus {
+    color: #dbea97 !important;
+}
+
+.gray {
+    color: #5f5e61 !important;
+}
+
+.gray:active, .gray:focus {
+    color: #878689 !important;
+}
+
+.black {
+    color: #2d2e2b !important;
+}
+
+.black:active, .black:focus {
+    color: #626260 !important;
+}
+
+.beige {
+    color: #b69f76 !important;
+}
+
+.beige:active, .beige:focus {
+    color: #c8b798 !important;
+}
+
+.beigeplus {
+    color: #e39568 !important;
+}
+
+.beigeplus:active, .beigeplus:focus {
+    color: #eab08e !important;
+}
+
+.brown {
+    color: #9a6362 !important;
+}
+
+.brown:active, .brown:focus {
+    color: #b38a89 !important;
+}
+
+.brownlight {
+    color: #a87878 !important;
+}
+
+.brownlight:active, .brownlight:focus {
+    color: #be9a9a !important;
+}
+
+.darkbrown {
+    color: #52323a !important;
+}
+
+.darkbrown:active, .darkbrown:focus {
+    color: #7d656b !important;
+}
+
+.darkpurple {
+    color: #584c58 !important;
+}
+
+.darkpurple:active, .darkpurple:focus {
+    color: #827982 !important;
+}
+
+.lightpurple {
+    color: #55367a !important;
+}
+
+.lightpurple:active, .lightpurple:focus {
+    color: #80689b !important;
+}
+
+.lightpurpleplus {
+    color: #af7ac4 !important;
+}
+
+.lightpurpleplus:active, .lightpurpleplus:focus {
+    color: #c39bd3 !important;
+}
+
+.purple {
+    color: #8e44ad !important;
+}
+
+.purple:active, .purple:focus {
+    color: #aa73c2 !important;
+}
+
+.purpleplus {
+    color: #ae5e9b !important;
+}
+
+.purpleplus:active, .purpleplus:focus {
+    color: #c286b4 !important;
+}
+
+.anotherpurple {
+    color: #9c00c5 !important;
+}
+
+.anotherpurple:active, .anotherpurple:focus {
+    color: #b540d4 !important;
+}
+
+.muddypurple {
+    color: #807399 !important;
+}
+
+.muddypurple:active, .muddypurple:focus {
+    color: #a096b3 !important;
+}
+
+.azure {
+    color: #00a2d3 !important;
+}
+
+.azure:active, .azure:focus {
+    color: #40b9de !important;
+}
+
+.blue {
+    color: #024883 !important;
+}
+
+.blue:active, .blue:focus {
+    color: #4176a2 !important;
+}
+
+.bluelight {
+    color: #80a8cc !important;
+}
+
+.bluelight:active, .bluelight:focus {
+    color: #a0bed9 !important;
+}
+
+.bluelightplus {
+    color: #6ab1b8 !important;
+}
+
+.bluelightplus:active, .bluelightplus:focus {
+    color: #8fc5ca !important;
+}
+
+.blueplus {
+    color: #2980b9 !important;
+}
+
+.blueplus:active, .blueplus:focus {
+    color: #5fa0cb !important;
+}
+
+.darkblue {
+    color: #34495e !important;
+}
+
+.darkblue:active, .darkblue:focus {
+    color: #677786 !important;
+}
+
+.darkbluelight {
+    color: #484860 !important;
+}
+
+.darkbluelight:active, .darkbluelight:focus {
+    color: #767688 !important;
+}
+
+.darkbluelightplus {
+    color: #60677a !important;
+}
+
+.darkbluelightplus:active, .darkbluelightplus:focus {
+    color: #888d9b !important;
+}

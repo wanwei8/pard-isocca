@@ -1,0 +1,211 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:remove="tag">
+<head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
+    <title>字典管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+
+<div class="page-header">
+    <h1>
+        字典管理
+        <small>
+            <i class="ace-icon fa fa-angle-double-right"></i>
+            列表
+        </small>
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
+                <form id="searchForm" class="breadcrumb form-inline" method="post">
+                    <div class="form-group">
+                        <label for="type">类型:</label>
+                        <select id="type" name="type" class="form-control select2" style="width:160px;">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">描述:</label>
+                        <input type="text" class="form-control" maxlength="50" id="description" name="description"/>
+                    </div>
+
+                    <button class="btn btn-primary btn-sm" onclick="search()" type="button">
+                        <i class="ace-icon fa fa-search"></i>查询
+                    </button>
+                    <button class="btn btn-sm" id="reset" type="button">
+                        <i class="ace-icon fa fa-refresh"></i>重置
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="tbl" class="table table-striped table-bordered table-hover" cellspacing="0"
+                       width="100%"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    var dictFormUrl = ctxAdmin + "/sys/dict/form";
+    var tab;
+    var scripts = [null,
+        /*[[@{/components/dataTables/js/jquery.dataTables.min.js}]]*/ null,
+        /*[[@{/components/dataTables/js/dataTables.bootstrap.min.js}]]*/ null,
+        /*[[@{/components/select2/js/select2.full.js}]]*/ "/components/select2/js/select2.full.js",
+        /*[[@{/components/select2/js/i18n/zh-CN.js}]]*/ null,
+        null];
+    $('.page-content-area').ace_ajax('loadScripts', scripts, function () {
+        $(function () {
+            initPageScript();
+            refreshTypeSelect();
+            initDataTableView();
+            $('#reset').on('click', reset);
+        });
+    });
+
+    function initDataTableView() {
+        var tableUrl = /*[[@{${@global.getApiPath()}+'/sys/dict/page'}]]*/ '/api';
+
+        $('#tbl').DataTable({
+            'ajax': {
+                'url': tableUrl,
+                'type': 'POST',
+            },
+            'rowId': 'id',
+            'serverSide': true,
+            'orderFixed': {
+                'pre': [[3, 'asc'], [5, 'asc']]
+            },
+            'columns': [
+                {
+                    'data': 'id',
+                    'visible': false,
+                    'title': 'ID',
+                    'orderable': false,
+                }, {
+                    'data': 'value',
+                    'title': '键值',
+                    'orderable': false,
+                }, {
+                    'data': 'label',
+                    'title': '标签',
+                    'orderable': false,
+                }, {
+                    'data': 'type',
+                    'title': '类型',
+                }, {
+                    'data': 'description',
+                    'title': '描述',
+                    'orderable': false,
+                }, {
+                    'data': 'sort',
+                    'title': '排序',
+                    'width': 40,
+                }, {
+                    'data': null,
+                    'title': '操作',
+                    'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
+                    makeTableEditSmbtn() +
+                    makeTableDelSmbtn() +
+                    makeTableAddSmbtn('添加键值') +
+                    '</div>',
+                    'orderable': false,
+                    'width': 130
+                },
+            ],
+            'initComplete': function () {
+                $("div .toolbar").html('<div class="btn-group">' +
+                    createToolbarAddBtn() +
+                    createToolbarRefBtn() +
+                    '</div>'
+                );
+            }
+        });
+        $('#tbl tbody').on('click', 'a#viewrow', view);
+        $('#tbl tbody').on('click', 'a#editrow', edit);
+        $('#tbl tbody').on('click', 'a#addrow', child);
+        $('#tbl tbody').on('click', 'a#delrow', del);
+    }
+</script>
+<script type="text/javascript">
+    <![CDATA[
+    function add() {
+        openDialog("新增字典", dictFormUrl, "800px", "500px", refresh);
+    }
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = dictFormUrl + '?id=' + data.id;
+        openDialogView('查看字典', url, '800px', '500px')
+    }
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = dictFormUrl + '?id=' + data.id;
+        openDialog('修改字典', url, '800px', '500px', refresh)
+    }
+    function child() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = dictFormUrl + '?type=' + data.type + '&description=' + encodeURI(data.description);
+        openDialog("添加键值", url, "800px", "500px", refresh);
+    }
+    function del() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxApi + '/sys/dict/' + data.id;
+        confirmx('确认要删除该字典码？', function () {
+            loading();
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                dataType: "json",
+                success: function (data) {
+                    if (data.code == 100) {
+                        closeLoading();
+                        msg(data.message);
+                        refresh();
+                    } else {
+                        err(data.message);
+                    }
+                },
+                error: function (request, textStatus, errorThrow) {
+                    err("提交服务器失败");
+                }
+            });
+        });
+    }
+
+    function refreshTypeSelect() {
+        var url = ctxApi + "/sys/dict/type";
+        bindSelect('type', url, true);
+    }
+    function search() {
+        var type = $('#type').val() || "-1";
+        var description = $('#description').val() || "";
+        var tab = $('#tbl').DataTable();
+        tab.columns(3).search('').columns(4).search('');
+        if ((type == "-1") && (description.length == 0)) {
+            tab.draw();
+        } else {
+            if (type != "-1") {
+                tab.columns(3).search(type);
+            }
+            if (description.length > 0) {
+                tab.column(4).search(description);
+            }
+            tab.draw();
+        }
+    }
+    function reset() {
+        $('#type').val("-1").trigger('change');
+        $('#description').val("");
+        search();
+    }
+    function refresh() {
+        refreshTypeSelect();
+        $('#tbl').DataTable().ajax.reload();
+    }
+    ]]>
+</script>
+</html>

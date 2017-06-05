@@ -1,0 +1,224 @@
+<html xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+<head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
+    <title>菜单管理</title>
+    <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
+</head>
+<div class="page-header">
+    <h1>
+        菜单管理
+        <small>
+            <i class="ace-icon fa fa-angle-double-right"></i>
+            列表
+        </small>
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-sm-3 col-xs-12 widget-container-col">
+        <div class="widget-box">
+            <div class="widget-header">
+                <h5 class="widget-title">
+                    <i class="ace-icon fa fa-filter"></i>
+                    菜单列表
+                </h5>
+            </div>
+            <div class="widget-body">
+                <div class="widget-main">
+                    <div id="tree" class="ztree scrollable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-9 col-xs-12">
+        <form id="listForm">
+            <table id="tbl" class="table table-striped table-bordered table-hover" cellspacing="0"
+                   width="100%"></table>
+        </form>
+    </div>
+</div>
+<script th:inline="javascript">
+    var editFormUrl = ctxAdmin + "/sys/menu/form";
+    var scripts = [null,
+        /*[[@{/components/jstree/jstree.min.js}]]*/ null,
+        /*[[@{/components/dataTables/js/jquery.dataTables.min.js}]]*/ null,
+        /*[[@{/components/dataTables/js/dataTables.bootstrap.min.js}]]*/ null,
+        null];
+    $('.page-content-area').ace_ajax('loadScripts', scripts, function () {
+        $(function () {
+            initPageScript();
+            initDataTableView();
+            initTreeView();
+        });
+    });
+
+    function initDataTableView() {
+        var tableUrl = ctxApi + "/sys/menu/";
+
+        $('#tbl').dataTable({
+            'ajax': {
+                'url': tableUrl,
+            },
+            'rowId': 'id',
+            'serverSide': true,
+            'paging': false,
+            'columns': [
+                {
+                    'data': 'id',
+                    'visible': false,
+                    'title': 'ID'
+                }, {
+                    'data': 'parent.id',
+                    'visible': false,
+                    'title': 'PID'
+                }, {
+                    'data': 'name',
+                    'title': '显示名称',
+                    'orderable': false,
+                }, {
+                    'data': 'href',
+                    'title': 'Web连接地址',
+                    'orderable': false,
+                }, {
+                    'data': 'isShow',
+                    'title': '菜单可见',
+                    'orderable': false,
+                    'width': '60px',
+                    "render": function (data, type, row) {
+                        if (data == "1")
+                            return '<span class="label label-success arrowed">显示</span>';
+                        return '<span class="label label-danger arrowed">隐藏</span>';
+                    }
+                }, {
+                    'data': 'sort',
+                    'title': '排序',
+                    'orderable': false,
+                    'width': '60px',
+                    'render': function (data, type, row) {
+                        return '<input type="text" name="ids" class="hide" value="' + row.id + '"/><input type="number" name="sorts" value="' + data + '" class="input-sm input-mini text-center" />';
+                    }
+                }, {
+                    'data': 'permission',
+                    'title': '权限标识',
+                    'orderable': false,
+                }, {
+                    'data': 'icon',
+                    'title': '菜单图标',
+                    'orderable': false,
+                    'className': 'text-center',
+                    'width': '60px',
+                    "render": function (data, type, row) {
+                        return '<i class="ace-icon ' + data + '" style="font-size:18px;"></i>';
+                    }
+                }, {
+                    'data': null,
+                    'title': '操作',
+                    'width': '100px',
+                    'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
+                    makeTableEditSmbtn() + makeTableDelSmbtn() + '</div>',
+                    'orderable': false,
+                },
+            ], 'initComplete': function () {
+                $("div .toolbar").html('<div class="btn-group">' +
+                    createToolbarAddBtn() +
+                    createToolbarSaveSortBtn() +
+                    createToolbarRefBtn() +
+                    '</div>'
+                );
+            }
+        });
+        $('#tbl tbody').on('click', 'a#viewrow', view);
+        $('#tbl tbody').on('click', 'a#editrow', edit);
+        $('#tbl tbody').on('click', 'a#delrow', del);
+    }
+</script>
+
+<script type="text/javascript">
+    <![CDATA[
+    function initTreeView(pid) {
+        pid = pid || '0';
+        var treeUrl = ctxApi + "/sys/menu/jstree?all=1";
+        bindJstree('tree', treeUrl, false, function (e, data) {
+            var treeObj = data.instance;
+            treeObj.deselect_all();
+            var obj = treeObj.get_node(pid);
+            treeObj.select_node(obj, false, false);
+        });
+        $('#tree').on('changed.jstree', function (e, data) {
+            refDataTables(data.selected);
+        });
+    }
+    function refDataTables(pid) {
+        var tab = $('#tbl').DataTable();
+        tab.columns(1).search(pid).draw();
+    }
+    function refresh() {
+        initTreeView();
+    }
+    function refreshCurrTreeNode() {
+        var treeObj = $('#tree').jstree();
+        var nodes = treeObj.get_selected();
+        if (nodes.length > 0) {
+            initAreaTreeView(treeObj.get_node(nodes[0]).id);
+        }
+    }
+
+    function add() {
+        var treeObj = $('#tree').jstree();
+        var nodes = treeObj.get_selected();
+        var url = editFormUrl;
+        if (nodes.length > 0) {
+            var node = treeObj.get_node(nodes[0]);
+            url += "?parent.id=" + node.id + "&parent.name=" + node.name;
+        }
+        openDialog("新增菜单", url, "800px", "500px", initTreeView);
+    }
+    function del() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxApi + '/sys/menu/' + data.id;
+        confirmx('确认要删除该记录码？', function () {
+            loading();
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                dataType: "json",
+                success: function (data) {
+                    closeLoading();
+                    if (data.code == 100) {
+                        msg(data.message);
+                        refreshCurrTreeNode();
+                    } else {
+                        err(data.message);
+                    }
+                },
+                error: function (request, textStatus, errorThrow) {
+                    err("提交服务器失败");
+                }
+            });
+        });
+    }
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialogView('查看菜单', url, '800px', '500px')
+    }
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialog('修改菜单', url, '800px', '500px', initTreeView)
+    }
+    function updateSort() {
+        var url = ctxApi + '/sys/menu/sort';
+        loading();
+        $.post(url, $('form').serialize(), function (data) {
+            closeAll();
+            if (data.code == 100) {
+                msg(data.message);
+                refreshCurrTreeNode();
+            } else {
+                err(data.message);
+            }
+        })
+    }
+    ]]>
+</script>
+</html>
