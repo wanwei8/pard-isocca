@@ -69,7 +69,7 @@
                     data: $(form).serialize(),
                     dataType: "json",
                     success: function (data) {
-                        if (data.code == 100) {
+                        if (data.success) {
                             if (typeof refershGrid === "function") {
                                 refershGrid();
                             }

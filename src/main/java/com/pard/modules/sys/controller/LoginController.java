@@ -33,12 +33,13 @@ import java.util.List;
 public class LoginController extends GenericController {
 
     @Autowired
-    private Producer captchaProducer = null;
+    private Producer captchaProducer;
     @Autowired
     private MenuService menuService;
 
     private Ordering<Menu> orderMenu = new Ordering<Menu>() {
         public int compare(Menu menu1, Menu menu2) {
+            if (menu1 == null || menu2 == null) return -1;
             return Ints.compare(menu1.getSort(), menu2.getSort());
         }
     };
@@ -138,10 +139,5 @@ public class LoginController extends GenericController {
         if (StringUtils.isBlank(href)) return "";
         String url = href.trim();
         return adminPath + "/" + (url.indexOf("/") == 0 ? url.substring(1) : url);
-    }
-
-    @Override
-    protected BaseService getService() {
-        return null;
     }
 }

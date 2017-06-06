@@ -57,6 +57,12 @@
             if (formGroup.find('.form-control') > 0 && formGroup.find('span.form-control-feedback').length == 0) {
                 $(element).after('<span class="ace-icon glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
             }
+            if ($(".tab-content").find("div.tab-pane.active:has(div.has-error)").length == 0) {
+                $(".tab-content").find("div.tab-pane:hidden:has(div.has-error)").each(function () {
+                    var id = $(this).attr("id");
+                    $('.tabbable a[href="#' + id + '"]').tab('show');
+                });
+            }
         },
         success: function (element) {
             var formGroup = $(element).closest('.form-group');

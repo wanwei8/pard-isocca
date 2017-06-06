@@ -75,6 +75,19 @@ public class Menu extends TreeEntity<Menu> {
         this.sort = sort;
     }
 
+    public Menu(String id, String pid, String name, String href, String isShow, int sort, String permission, String icon) {
+        this(id);
+        if (StringUtils.isNotBlank(pid)) {
+            this.parent = new Menu(pid);
+        }
+        this.name = name;
+        this.href = href;
+        this.isShow = isShow;
+        this.sort = sort;
+        this.permission = permission;
+        this.icon = icon;
+    }
+
     public String getHref() {
         return href;
     }

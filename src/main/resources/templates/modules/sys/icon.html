@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
     <title>图标信息</title>
-    <link rel="stylesheet" th:href="@{/components/ztree/css/zTreeStyle/zTreeStyle.css}"/>
+    <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
 </head>
 <body class="page-content">
 <div class="row">
@@ -16,7 +16,7 @@
             </div>
             <div class="widget-body">
                 <div class="widget-main no-padding">
-                    <div id="category" class="ztree"></div>
+                    <div id="category"></div>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
 </div>
 
 <th:block th:replace="include/dialog_template :: javascript"/>
-<script th:src="@{/components/ztree/js/jquery.ztree.all.min.js}"></script>
+<script th:src="@{/components/jstree/jstree.min.js}"></script>
 <script th:src="@{/js/jPage-1.2.js}"></script>
 
 <script type="text/javascript">
@@ -141,10 +141,10 @@
     }
     function bindTree() {
         var treeUrl = ctxApi + "/sys/menu/icon/category";
-        bindZtree('category', treeUrl, treeOnClick, true);
-    }
-    function treeOnClick(id, name) {
-        search(1, '', name);
+        bindJstree('category', treeUrl, false);
+        $('#category').on('changed.jstree', function (e, data) {
+            search(1, '', data.selected);
+        });
     }
 
     function generate() {
@@ -175,16 +175,24 @@
         var iconUrl = ctxApi + "/sys/menu/icon/list?page=" + page + "&icon=" + icon + "&category=" + category;
         $.getJSON(iconUrl, function (data) {
             $("#grid_body").html("");
-            $.each(data.content, function (i, item) {
-                var html = '<li><a href="javascript:;" onclick="setIconClass(\'' + item.className + '\',\'' + item.displayName + '\')" title="' + item.displayName + '"><span class="ace-icon ' + item.className + '" aria-hidden="true"></span></a></li>';
-                $("#grid_body").append(html);
-            });
-            var element = $('#grid_paging');
-            if (data.totalElements > 0) {
-                currentPage = parseInt(data.number || 0) + 1
-                element.page({count: data.totalElements, pageSize: data.size, pageNo: currentPage, skipPart: false});
-            } else {
-                element.html("");
+            if (data.success) {
+                var cdata = data.data;
+                $.each(cdata.content, function (i, item) {
+                    var html = '<li><a href="javascript:;" onclick="setIconClass(\'' + item.className + '\',\'' + item.displayName + '\')" title="' + item.displayName + '"><span class="ace-icon ' + item.className + '" aria-hidden="true"></span></a></li>';
+                    $("#grid_body").append(html);
+                });
+                var element = $('#grid_paging');
+                if (cdata.totalElements > 0) {
+                    currentPage = parseInt(cdata.number || 0) + 1
+                    element.page({
+                        count: cdata.totalElements,
+                        pageSize: cdata.size,
+                        pageNo: currentPage,
+                        skipPart: false
+                    });
+                } else {
+                    element.html("");
+                }
             }
         });
     }

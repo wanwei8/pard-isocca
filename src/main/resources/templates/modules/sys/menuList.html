@@ -24,7 +24,7 @@
             </div>
             <div class="widget-body">
                 <div class="widget-main">
-                    <div id="tree" class="ztree scrollable"></div>
+                    <div id="tree" class="scrollable"></div>
                 </div>
             </div>
         </div>
@@ -136,7 +136,7 @@
     <![CDATA[
     function initTreeView(pid) {
         pid = pid || '0';
-        var treeUrl = ctxApi + "/sys/menu/jstree?all=1";
+        var treeUrl = ctxApi + "/sys/menu/tree?all=1";
         bindJstree('tree', treeUrl, false, function (e, data) {
             var treeObj = data.instance;
             treeObj.deselect_all();
@@ -183,7 +183,7 @@
                 dataType: "json",
                 success: function (data) {
                     closeLoading();
-                    if (data.code == 100) {
+                    if (data.success) {
                         msg(data.message);
                         refreshCurrTreeNode();
                     } else {
@@ -211,13 +211,13 @@
         loading();
         $.post(url, $('form').serialize(), function (data) {
             closeAll();
-            if (data.code == 100) {
+            if (data.success) {
                 msg(data.message);
                 refreshCurrTreeNode();
             } else {
                 err(data.message);
             }
-        })
+        });
     }
     ]]>
 </script>

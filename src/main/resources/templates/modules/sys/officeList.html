@@ -176,7 +176,7 @@
                 type: "DELETE",
                 dataType: "json",
                 success: function (data) {
-                    if (data.code == 100) {
+                    if (data.success) {
                         closeLoading();
                         msg(data.message);
                         refreshCurrTreeNode();
@@ -206,7 +206,7 @@
         try {
             $.post(url, $('form').serialize(), function (data) {
                 closeAll();
-                if (data.code == 100) {
+                if (data.success) {
                     msg(data.message);
                     refreshCurrTreeNode();
                 } else {
@@ -217,7 +217,6 @@
             closeAll();
         }
     }
-
     ]]>
 </script>
 </html>

@@ -14,7 +14,5 @@ public interface MenuService extends TreeService<Menu> {
 
     List<Menu> findByParentId(String pid);
 
-    List<Menu> findWithTree();
-
     List<Menu> findAllMenu();
 }

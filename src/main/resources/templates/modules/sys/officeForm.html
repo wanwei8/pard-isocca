@@ -4,6 +4,7 @@
     <title>组织机构管理</title>
     <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+    <script src="../../../static/js/site.js"></script>
 </head>
 <body class="page-content">
 <div class="row">
@@ -179,6 +180,7 @@
         $("#name").focus();
 
         validateForm = $("#inputForm").validate({
+            ignore: "",
             submitHandler: function (form) {
                 loading();
                 $.ajax({
@@ -187,7 +189,7 @@
                     data: $(form).serialize(),
                     dataType: "json",
                     success: function (data) {
-                        if (data.code == 100) {
+                        if (data.success) {
                             if (typeof refershParent === "function") {
                                 refershParent([[${office.parent.id}]]);
                             }
@@ -205,8 +207,6 @@
             },
         });
     });
-
-
 </script>
 
 <script type="text/javascript">

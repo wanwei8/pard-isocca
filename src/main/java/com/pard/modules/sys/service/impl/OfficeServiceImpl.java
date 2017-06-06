@@ -3,12 +3,10 @@ package com.pard.modules.sys.service.impl;
 import com.google.common.collect.Lists;
 import com.pard.common.persistence.DataEntity;
 import com.pard.common.service.impl.TreeServiceImpl;
-import com.pard.common.utils.IdGen;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Office;
 import com.pard.modules.sys.repository.OfficeRepostiroy;
 import com.pard.modules.sys.service.OfficeService;
-import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.Query;
 import javax.persistence.criteria.*;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,14 +33,27 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
         return "offices";
     }
 
+    @Cacheable
     @Override
     public List<Office> findByParentId(String pid) {
-        if (StringUtils.isBlank(pid) || "0".equals(pid)) {
-            return getRepository().findAllByParentId();
+        StringBuilder sbHql = new StringBuilder();
+        sbHql.append("select new Office(id, parent.id, name, code, type, sort, useable, remarks)")
+                .append(" from Office o")
+                .append(" where o.delFlag = :delFlag")
+                .append(" and o.parent ")
+                .append((StringUtils.isBlank(pid) || "0".equals(pid)) ? " is null" : " = :parent")
+                .append(" order by o.sort");
+
+        Query query = entityManager.createQuery(sbHql.toString());
+        query.setParameter("delFlag", Office.DEL_FLAG_NORMAL);
+        if (StringUtils.isNotBlank(pid) && !"0".equals(pid)) {
+            query.setParameter("parent", new Office(pid));
         }
-        return getRepository().findAllByParentId(pid);
+
+        return query.getResultList();
     }
 
+    @Cacheable
     @Override
     public List<Office> findAllWithTree() {
         return getRepository().findAllWithTree();

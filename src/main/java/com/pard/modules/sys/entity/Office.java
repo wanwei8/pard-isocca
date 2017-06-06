@@ -87,6 +87,15 @@ public class Office extends TreeEntity<Office> {
         this.type = type;
     }
 
+    public Office(String id, String pid, String name, String code, String type, Integer sort, String useable, String remarks) {
+        this(id, pid, name);
+        this.code = code;
+        this.type = type;
+        this.sort = sort;
+        this.useable = useable;
+        this.remarks = remarks;
+    }
+
     @Override
     public Office getParent() {
         return parent;

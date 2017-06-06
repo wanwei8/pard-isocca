@@ -5,6 +5,7 @@ import com.pard.common.datatables.DataTableResponse;
 import com.pard.common.datatables.DataTablesRepository;
 import com.pard.common.persistence.BaseEntity;
 import com.pard.common.service.BaseService;
+import com.pard.common.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,9 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
 
     @Override
     public void save(T model) {
+        if (StringUtils.isBlank(model.getId()))
+            model.preInsert();
+        model.preUpdate();
         repository.save(model);
         clearCache();
     }
@@ -74,7 +78,6 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
         Cache cache = cacheManager.getCache(getCacheName());
         if (cache != null) {
             cache.clear();
-            ;
         }
     }
 }

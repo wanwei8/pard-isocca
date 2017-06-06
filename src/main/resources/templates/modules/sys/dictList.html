@@ -51,7 +51,6 @@
 </div>
 <script th:inline="javascript">
     var dictFormUrl = ctxAdmin + "/sys/dict/form";
-    var tab;
     var scripts = [null,
         /*[[@{/components/dataTables/js/jquery.dataTables.min.js}]]*/ null,
         /*[[@{/components/dataTables/js/dataTables.bootstrap.min.js}]]*/ null,
@@ -161,7 +160,7 @@
                 type: "DELETE",
                 dataType: "json",
                 success: function (data) {
-                    if (data.code == 100) {
+                    if (data.success) {
                         closeLoading();
                         msg(data.message);
                         refresh();

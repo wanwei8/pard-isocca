@@ -235,6 +235,12 @@ public class ResponseMessage implements Serializable {
         return ok(null);
     }
 
+    public static ResponseMessage ok(String message) {
+        ResponseMessage rm = new ResponseMessage(message);
+        rm.setSuccess(true);
+        return rm;
+    }
+
     public static ResponseMessage ok(Object data) {
         return new ResponseMessage(true, data);
     }

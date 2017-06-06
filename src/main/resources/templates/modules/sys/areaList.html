@@ -160,9 +160,9 @@
                 dataType: "json",
                 success: function (data) {
                     closeLoading();
-                    if (data.code == 100) {
+                    if (data.success) {
                         msg(data.message);
-                        refreshCurrTreeNode
+                        refreshCurrTreeNode();
                     } else {
                         err(data.message);
                     }
@@ -188,7 +188,7 @@
         loading();
         $.post(url, $('form').serialize(), function (data) {
             closeAll();
-            if (data.code == 100) {
+            if (data.success) {
                 msg(data.message);
                 refreshCurrTreeNode();
             } else {

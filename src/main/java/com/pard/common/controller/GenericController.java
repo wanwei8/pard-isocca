@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
 /**
  * Created by wawe on 17/6/1.
  */
-public abstract class GenericController<Ps extends BaseService> implements StringConstant {
+public abstract class GenericController implements StringConstant {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,6 +29,12 @@ public abstract class GenericController<Ps extends BaseService> implements Strin
      */
     @Value("${adminPath}")
     protected String adminPath;
+
+    /***
+     * Rest路径
+     */
+    @Value("${apiPath}")
+    protected String apiPath;
 
     protected HttpServletRequest request;
 
@@ -41,22 +47,6 @@ public abstract class GenericController<Ps extends BaseService> implements Strin
         this.request = request;
         this.response = response;
         this.session = request.getSession();
-    }
-
-    /**
-     * 获取此controller需要的服务类，由子类实现
-     *
-     * @return
-     */
-    protected abstract Ps getService();
-
-    /**
-     * 获取Ps的类型
-     *
-     * @return
-     */
-    protected final Class<Ps> getPsType() {
-        return (Class<Ps>) ClassUtils.getGenericType(this.getClass(), 0);
     }
 
     /**

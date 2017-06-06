@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Created by wawe on 17/5/30.
@@ -770,4 +771,17 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         }
     }
 
+    public static List<String> regexMatcherToList(String regex, String content) {
+        List<String> r = Lists.newArrayList();
+        try {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(content);
+            while (matcher.find()) {
+                r.add(matcher.group(1));
+            }
+        } catch (PatternSyntaxException ex) {
+            ex.printStackTrace();
+        }
+        return r;
+    }
 }

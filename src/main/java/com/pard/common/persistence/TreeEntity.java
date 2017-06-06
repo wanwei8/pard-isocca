@@ -95,9 +95,4 @@ public abstract class TreeEntity<T extends BaseEntity> extends DataEntity<T> {
         hash = 31 * hash + (null == parentIds ? 0 : parentIds.hashCode());
         return hash;
     }
-
-    @Override
-    public String toString() {
-        return this.name;
-    }
 }

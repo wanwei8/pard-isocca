@@ -46,6 +46,14 @@ public class Area extends TreeEntity<Area> {
         this.parentIds = parentIds;
     }
 
+    public Area(String id, String pid, String name, String code, String type, int sort, String remarks) {
+        this(id, pid, name);
+        this.code = code;
+        this.type = type;
+        this.sort = sort;
+        this.setRemarks(remarks);
+    }
+
     @Override
     public Area getParent() {
         return parent;

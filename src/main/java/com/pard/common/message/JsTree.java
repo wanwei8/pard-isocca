@@ -22,6 +22,18 @@ public class JsTree implements Serializable {
         state = new JsTreeState();
     }
 
+    public JsTree(String id, String parent, String text) {
+        this();
+        this.id = id;
+        this.parent = parent;
+        this.text = text;
+    }
+
+    public JsTree(String id, String parent, String text, boolean select) {
+        this(id, parent, text);
+        this.state.setSelected(select);
+    }
+
     public String getId() {
         return id;
     }

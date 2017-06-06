@@ -8,6 +8,8 @@ import com.pard.modules.sys.repository.MenuRepository;
 import com.pard.modules.sys.service.MenuService;
 import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Query;
@@ -17,6 +19,7 @@ import java.util.List;
 /**
  * Created by wawe on 17/5/19.
  */
+@CacheConfig(cacheNames = "menus")
 @Component("menuService")
 public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> implements MenuService {
     @Autowired
@@ -41,17 +44,24 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         clearCache();
     }
 
+    @Cacheable
     @Override
     public List<Menu> findByParentId(String pid) {
-        if (StringUtils.isBlank(pid) || "0".equals(pid)) {
-            return getRepository().findAllByParentId();
-        }
-        return getRepository().findAllByParentId(pid);
-    }
+        StringBuilder sbHql = new StringBuilder();
+        sbHql.append("select new Menu(id, parent.id, name, href, isShow, sort, permission, icon)")
+                .append(" from Menu m")
+                .append(" where m.delFlag = :delFlag")
+                .append(" and m.parent ")
+                .append((StringUtils.isBlank(pid) || "0".equals(pid)) ? " is null" : " = :parent")
+                .append(" order by m.sort");
 
-    @Override
-    public List<Menu> findWithTree() {
-        return getRepository().findAllWithTree();
+        Query query = entityManager.createQuery(sbHql.toString());
+        query.setParameter("delFlag", Menu.DEL_FLAG_NORMAL);
+        if (StringUtils.isNotBlank(pid) && !"0".equals(pid)) {
+            query.setParameter("parent", new Menu(pid));
+        }
+
+        return query.getResultList();
     }
 
     @Override
@@ -72,6 +82,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         super.save(menu);
     }
 
+    @Cacheable
     @Override
     public List<Menu> findAllMenu() {
         return getRepository().findAllMenu();
