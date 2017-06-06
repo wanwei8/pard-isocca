@@ -14,11 +14,9 @@ import java.util.Date;
 /**
  * Created by wawe on 17/5/3.
  */
-@CacheConfig(cacheNames = "users")
 public interface UserRepository extends DataTablesRepository<User, String> {
 
     @Transactional(readOnly = true)
-    @Cacheable
     @Query(value = "select u from User u where u.loginName=:loginName")
     User findByName(@Param("loginName") String loginName);
 

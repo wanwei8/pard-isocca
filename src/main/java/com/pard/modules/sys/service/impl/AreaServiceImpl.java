@@ -9,6 +9,7 @@ import com.pard.modules.sys.service.AreaService;
 import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -53,11 +54,13 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         return query.getResultList();
     }
 
+    @Cacheable
     @Override
     public List<Area> findAllWithTree() {
         return getRepository().findAllWithTree();
     }
 
+    @CacheEvict(allEntries = true)
     @Override
     public void save(Area area) {
         if (area.getParent() != null) {
@@ -77,6 +80,7 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         super.save(area);
     }
 
+    @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Area> areas) {
         String hql = "update Area a set a.sort = :sort Where a.id = :id";
@@ -87,5 +91,11 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
             query.executeUpdate();
         }
         clearCache();
+    }
+
+    @CacheEvict(allEntries = true)
+    @Override
+    public void delete(String id) {
+        super.delete(id);
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 /**
  * Created by wawe on 17/5/16.
  */
-@CacheConfig(cacheNames = "icons")
 public interface IconInfoRepository extends PagingAndSortingRepository<IconInfo, String>, JpaSpecificationExecutor<IconInfo> {
 
 }

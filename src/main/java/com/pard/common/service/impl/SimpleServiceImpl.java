@@ -11,7 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,19 +63,20 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
         return repository.findAll(input);
     }
 
+    @Modifying
+    @Transactional
     @Override
     public void delete(String id) {
         repository.delete(id);
-        clearCache();
     }
 
+    @Transactional
     @Override
     public void save(T model) {
         if (StringUtils.isBlank(model.getId()))
             model.preInsert();
         model.preUpdate();
         repository.save(model);
-        clearCache();
     }
 
     public void clearCache() {

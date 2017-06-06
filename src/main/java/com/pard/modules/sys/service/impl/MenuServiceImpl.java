@@ -9,8 +9,10 @@ import com.pard.modules.sys.service.MenuService;
 import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
 import java.util.Date;
@@ -33,6 +35,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         return "menus";
     }
 
+    @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Menu> menus) {
         Query query = entityManager.createQuery("update Menu m set m.sort = :sort Where m.id = :id");
@@ -41,7 +44,6 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
             query.setParameter("id", menu.getId());
             query.executeUpdate();
         }
-        clearCache();
     }
 
     @Cacheable
@@ -64,6 +66,13 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         return query.getResultList();
     }
 
+    @Cacheable
+    @Override
+    public List<Menu> findAllMenu() {
+        return getRepository().findAllMenu();
+    }
+
+    @CacheEvict(allEntries = true)
     @Override
     public void save(Menu menu) {
         if (menu.getParent() != null) {
@@ -82,9 +91,9 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         super.save(menu);
     }
 
-    @Cacheable
+    @CacheEvict(allEntries = true)
     @Override
-    public List<Menu> findAllMenu() {
-        return getRepository().findAllMenu();
+    public void delete(String id) {
+        super.delete(id);
     }
 }

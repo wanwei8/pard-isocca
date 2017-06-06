@@ -9,8 +9,11 @@ import com.pard.modules.sys.repository.OfficeRepostiroy;
 import com.pard.modules.sys.service.OfficeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
 import javax.persistence.criteria.*;
@@ -19,8 +22,8 @@ import java.util.List;
 /**
  * Created by wawe on 17/5/22.
  */
-@Component("officeService")
 @CacheConfig(cacheNames = "offices")
+@Component("officeService")
 public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy> implements OfficeService {
     @Autowired
     @Override
@@ -59,6 +62,7 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
         return getRepository().findAllWithTree();
     }
 
+    @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Office> offices) {
         Query query = entityManager.createQuery("update Office m set m.sort = :sort Where m.id = :id");
@@ -105,6 +109,8 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
         return entityManager.createQuery(cq).getResultList();
     }
 
+    @Transactional
+    @CacheEvict(allEntries = true)
     @Override
     public void save(Office office) {
         if (office.getParent() != null) {
@@ -121,5 +127,16 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
             }
         }
         super.save(office);
+    }
+
+    @Modifying
+    @Transactional
+    @CacheEvict(allEntries = true)
+    @Override
+    public void delete(String id) {
+        String hql = "delete Office o where o.id = :id";
+        Query query = entityManager.createQuery(hql);
+        query.setParameter("id", id);
+        query.executeUpdate();
     }
 }
