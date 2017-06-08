@@ -54,10 +54,10 @@ public class CacheConfig {
         return new RemovalListener<Object, Object>() {
             @Override
             public void onRemoval(RemovalNotification<Object, Object> removalNotification) {
-                String tips = String.format("key=%s,value=%s,reason=%s", removalNotification.getKey(),
+                /*String tips = String.format("key=%s,value=%s,reason=%s", removalNotification.getKey(),
                         removalNotification.getValue(),
                         removalNotification.getCause());
-                logger.debug(tips);
+                logger.debug(tips);*/
 
                 /*if (RemovalCause.EXPLICIT != removalNotification.getCause()){
                     try{

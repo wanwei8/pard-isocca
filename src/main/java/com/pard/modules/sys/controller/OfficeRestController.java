@@ -37,7 +37,7 @@ public class OfficeRestController extends GenericController implements MessageCo
     private DictService dictService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public DataTableResponse<Office> getAreaList(@Valid DataTableRequest input) {
+    public ResponseMessage getAreaList(@Valid DataTableRequest input) {
         Column column = input.getColumn("parent.id");
         List<Office> offices = officeService.findByParentId(column.getSearch().getValue());
         Set<Dict> dicts = Sets.newHashSet(dictService.findByType("sys_office_type"));
@@ -58,7 +58,7 @@ public class OfficeRestController extends GenericController implements MessageCo
         r.setData(offices);
         r.setRecordsTotal(offices.size());
         r.setRecordsFiltered(offices.size());
-        return r;
+        return ResponseMessage.ok(r).onlyData();
     }
 
     @RequestMapping(value = "/tree", method = RequestMethod.GET)

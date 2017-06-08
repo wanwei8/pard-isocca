@@ -19,6 +19,10 @@ public interface BaseService<T extends BaseEntity> {
 
     DataTableResponse<T> findAll(DataTableRequest input);
 
+    DataTableResponse<T> findAll(DataTableRequest input, Specification<T> additionalSpecification);
+
+    DataTableResponse<T> findAll(DataTableRequest input, Specification<T> additionalSpecification, Specification<T> preFilteringSpecification);
+
     void delete(String id);
 
     void save(T model);

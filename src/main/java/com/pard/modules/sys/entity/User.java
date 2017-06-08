@@ -15,14 +15,14 @@ public class User extends DataEntity<User> {
     /**
      * 归属公司
      */
-    @ManyToOne(targetEntity = Office.class)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
     private Office company;
 
     /**
      * 归属部门
      */
-    @ManyToOne(targetEntity = Office.class)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
     private Office office;
 
@@ -36,6 +36,7 @@ public class User extends DataEntity<User> {
      * 密码
      */
     @Column(length = 100, nullable = false)
+    @JSONField(serialize = false)
     private String password;
 
     /**
@@ -54,36 +55,42 @@ public class User extends DataEntity<User> {
      * 邮箱
      */
     @Column(length = 200)
+    @JSONField(serialize = false)
     private String email;
 
     /**
      * 电话
      */
     @Column(length = 200)
+    @JSONField(serialize = false)
     private String phone;
 
     /**
      * 手机
      */
     @Column(length = 200)
+    @JSONField(serialize = false)
     private String mobile;
 
     /**
      * 传真
      */
     @Column(length = 200)
+    @JSONField(serialize = false)
     private String fax;
 
     /**
      * 用户类型
      */
     @Column(length = 1)
+    @JSONField(serialize = false)
     private String userType;
 
     /**
      * 用户头像
      */
     @Column(length = 1000)
+    @JSONField(serialize = false)
     private String photo;
 
     /**
@@ -115,18 +122,21 @@ public class User extends DataEntity<User> {
      * 性别 0:女/1:男
      */
     @Column
+    @JSONField(serialize = false)
     private Short gender;
 
     /**
      * 新密码
      */
     @Transient
+    @JSONField(serialize = false)
     private String newPassword;
 
     /**
      * 原登录名
      */
     @Transient
+    @JSONField(serialize = false)
     private String oldName;
 
     public User() {

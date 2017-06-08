@@ -84,9 +84,11 @@
         null];
     $('.page-content-area').ace_ajax('loadScripts', scripts, function () {
         $(function () {
+
             initPageScript();
             initTreeView();
             initDataTableView();
+
         });
 
     });
@@ -96,12 +98,10 @@
         $('#tbl').DataTable({
             'ajax': {
                 'url': tableUrl,
-                'type': 'POST',
             },
             scrollY: 300,
             scrollCollapse: true,
             'rowId': 'id',
-            'serverSide': true,
             'columns': [
                 {
                     'data': 'id',

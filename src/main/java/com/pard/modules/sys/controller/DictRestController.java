@@ -28,7 +28,7 @@ public class DictRestController extends GenericController implements MessageCons
     @Autowired
     private DictService dictService;
 
-    @RequestMapping(value = "/page", method = RequestMethod.POST)
+    @RequestMapping(value = "/page", method = RequestMethod.GET)
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
         DataTableResponse<Dict> dicts = dictService.findAll(input);
         return ResponseMessage.ok(dicts).onlyData();

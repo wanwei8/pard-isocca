@@ -72,12 +72,13 @@
         $('#tbl').DataTable({
             'ajax': {
                 'url': tableUrl,
-                'type': 'POST',
             },
             'rowId': 'id',
-            'serverSide': true,
             'orderFixed': {
-                'pre': [[3, 'asc'], [5, 'asc']]
+                'pre': [
+                    [3, 'asc'],
+                    [5, 'asc']
+                ]
             },
             'columns': [
                 {

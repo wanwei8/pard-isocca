@@ -15,7 +15,7 @@ import java.util.List;
 public class Office extends TreeEntity<Office> {
     private static final long serialVersionUID = 1L;
 
-    @OneToOne(targetEntity = Area.class, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Area area;        // 归属区域
 

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
@@ -148,5 +149,10 @@ public class DruidDBConfig {
             logger.error("Unable to parse connection properties.", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Bean
+    public OpenEntityManagerInViewFilter openEntityManagerInViewFilter() {
+        return new OpenEntityManagerInViewFilter();
     }
 }

@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Created by wawe on 17/5/19.
@@ -60,7 +64,24 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
 
     @Override
     public DataTableResponse<T> findAll(DataTableRequest input) {
-        return repository.findAll(input);
+        Specification<T> specification = new Specification<T>() {
+            @Override
+            public Predicate toPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                Predicate predicate = criteriaBuilder.equal(root.get("delFlag").as(String.class), T.DEL_FLAG_NORMAL);
+                return criteriaBuilder.and(predicate);
+            }
+        };
+        return repository.findAll(input, null, specification);
+    }
+
+    @Override
+    public DataTableResponse<T> findAll(DataTableRequest input, Specification<T> additionalSpecification) {
+        return repository.findAll(input, additionalSpecification);
+    }
+
+    @Override
+    public DataTableResponse<T> findAll(DataTableRequest input, Specification<T> additionalSpecification, Specification<T> preFilteringSpecification) {
+        return repository.findAll(input, additionalSpecification, preFilteringSpecification);
     }
 
     @Modifying

@@ -16,6 +16,7 @@ import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.IconInfo;
 import com.pard.modules.sys.entity.Menu;
 import com.pard.modules.sys.repository.IconInfoRepository;
+import com.pard.modules.sys.service.IconInfoService;
 import com.pard.modules.sys.service.MenuService;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +42,13 @@ import java.util.List;
 @RequestMapping(value = "${apiPath}/sys/menu")
 public class MenuRestController extends GenericController implements MessageConstant {
     @Autowired
-    private IconInfoRepository iconInfoRepository;
+    private IconInfoService iconInfoService;
 
     @Autowired
     private MenuService menuService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public DataTableResponse<Menu> getAreaList(@Valid DataTableRequest input) {
+    public ResponseMessage getAreaList(@Valid DataTableRequest input) {
         Column column = input.getColumn("parent.id");
         String pid = column.getSearch().getValue();
         if (StringUtils.isBlank(pid))
@@ -59,7 +60,7 @@ public class MenuRestController extends GenericController implements MessageCons
         r.setData(menus);
         r.setRecordsTotal(menus.size());
         r.setRecordsFiltered(menus.size());
-        return r;
+        return ResponseMessage.ok(r).onlyData();
     }
 
     @RequestMapping(value = "select2tree", method = RequestMethod.POST)
@@ -161,21 +162,7 @@ public class MenuRestController extends GenericController implements MessageCons
     public ResponseMessage findIconsWithPage(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                              @RequestParam(value = "size", defaultValue = "50") Integer size,
                                              String category, String icon) {
-        Pageable pageable = new PageRequest(page, size);
-        Specification<IconInfo> specification = new Specification<IconInfo>() {
-            @Override
-            public Predicate toPredicate(Root<IconInfo> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-                List<Predicate> predicates = Lists.newArrayList();
-                if (StringUtils.isNotBlank(category) && !"search".equals(category)) {
-                    predicates.add(cb.equal(root.get("sourceType").as(String.class), category));
-                }
-                if (StringUtils.isNotBlank(icon)) {
-                    predicates.add(cb.like(root.get("displayName").as(String.class), "%" + icon + "%"));
-                }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            }
-        };
-        return ResponseMessage.ok(iconInfoRepository.findAll(specification, pageable));
+        return ResponseMessage.ok(iconInfoService.findAll(page, size, category, icon));
     }
 
     @RequestMapping(value = "icon/generate")
@@ -209,7 +196,7 @@ public class MenuRestController extends GenericController implements MessageCons
                 dbInconInfoes.add(info);
             }
 
-            iconInfoRepository.save(dbInconInfoes);
+            iconInfoService.save(dbInconInfoes);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
