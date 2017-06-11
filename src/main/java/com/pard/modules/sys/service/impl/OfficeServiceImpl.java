@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
@@ -23,6 +24,7 @@ import java.util.List;
  * Created by wawe on 17/5/22.
  */
 @CacheConfig(cacheNames = "offices")
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Component("officeService")
 public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy> implements OfficeService {
     @Autowired
@@ -62,6 +64,7 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
         return getRepository().findAllWithTree();
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Office> offices) {
@@ -134,9 +137,6 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
     @CacheEvict(allEntries = true)
     @Override
     public void delete(String id) {
-        String hql = "delete Office o where o.id = :id";
-        Query query = entityManager.createQuery(hql);
-        query.setParameter("id", id);
-        query.executeUpdate();
+        super.delete(id);
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
  * Created by wawe on 17/5/22.
  */
 @CacheConfig(cacheNames = "areas")
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Component("areaService")
 public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> implements AreaService {
 
@@ -60,6 +63,7 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         return getRepository().findAllWithTree();
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void save(Area area) {
@@ -80,6 +84,7 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         super.save(area);
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Area> areas) {
@@ -93,6 +98,7 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         clearCache();
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void delete(String id) {

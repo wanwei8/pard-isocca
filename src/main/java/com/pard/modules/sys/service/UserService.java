@@ -12,4 +12,8 @@ public interface UserService extends BaseService<User> {
     User findByName(String name);
 
     void saveLoginInfo(String id, String addr, Date date);
+
+    void disableUser(String id);
+
+    void enableUser(String id);
 }

@@ -4,18 +4,19 @@ import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
 import com.pard.common.datatables.DataTableResolver;
 import nz.net.ultraq.thymeleaf.LayoutDialect;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.extras.springsecurity4.dialect.SpringSecurityDialect;
@@ -34,6 +35,8 @@ import java.util.Properties;
 @Configuration
 public class MvcConfig extends WebMvcConfigurerAdapter implements ApplicationContextAware {
     private ApplicationContext applicationContext;
+    @Value("${pard.fileUploadPath}")
+    private String fileUploadPath = "/Users/wawe/upfile/";
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -111,5 +114,12 @@ public class MvcConfig extends WebMvcConfigurerAdapter implements ApplicationCon
                 container.addErrorPages(new ErrorPage(Throwable.class, "/error/500"));
             }
         };
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //加载文件上传目录
+        registry.addResourceHandler("/upload/**").addResourceLocations("file://" + fileUploadPath);
+        super.addResourceHandlers(registry);
     }
 }

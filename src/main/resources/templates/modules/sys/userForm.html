@@ -4,6 +4,8 @@
     <title>用户管理</title>
     <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/bootstrap-fileinput/css/fileinput.min.css}"
+          media="all"/>
 </head>
 <body class="page-content">
 <div class="row">
@@ -29,6 +31,7 @@
                 <form id="inputForm" class="form-horizontal" role="form" th:object="${user}">
                     <input type="hidden" name="id" th:value="*{id}"/>
                     <input type="hidden" name="oldName" th:value="*{loginName}"/>
+                    <input type="hidden" id="photo" name="photo" th:value="*{photo}"/>
                     <div class="row">
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
@@ -223,7 +226,7 @@
                     <div class="col-xs-12">
                         <form class="dropzone well">
                             <div class="fallback">
-                                <input name="photo" type="file"/>
+                                <input name="file" id="photoFile" type="file"/>
                             </div>
                         </form>
                     </div>
@@ -237,6 +240,8 @@
 <script th:src="@{/components/select2/js/select2tree.js}"></script>
 <script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
 <script th:src="@{/components/treeSelect/jquery.treeSelect.js}"></script>
+<script th:src="@{/components/bootstrap-fileinput/fileinput.min.js}"></script>
+<script th:src="@{/components/bootstrap-fileinput/locales/zh.js}"></script>
 <script th:inline="javascript">
     var validateForm;
     var refershParent;
@@ -252,6 +257,7 @@
         select2Company([[${user.company.id}]], [[${user.office.id}]]);
         buildSelect('duties', 'sys_duties', [[${user.duties}]]);
         buildSelect('loginFlag', 'yes_no', [[${user.loginFlag}]]);
+        bindFileInput();
         validateForm = $("#inputForm").validate({
             submitHandler: function (form) {
                 loading();
@@ -301,6 +307,36 @@
     function buildSelect(control, type, val) {
         var url = ctxApi + "/sys/dict/dict?type=" + type;
         bindSelect(control, url, val);
+    }
+    function bindFileInput() {
+        /* $('#photo').ace_file_input({
+         style:'well',
+         btn_choose: '请选择图片...',
+         btn_change: null,
+         no_icon:'ace-icon fa fa-cloud-upload',
+         dropable:false,
+         thumbnail:'large',
+         allowExt:['jpeg','jpg','png','gif','bmp'],
+         allowMime:['image/jpg','image/jpeg','image/png','image/gif','image/bmp'],
+         }).on('file.error.ace',function(event, info){
+         if(info.error_list.ext.length > 0){
+         err('请上传图片格式文件');
+         }else if(info.error_list.mime.length > 0){
+         err('请上传有效的图片格式文件');
+         }
+         });*/
+
+        $("#photoFile").fileinput({
+            language: 'zh',
+            uploadUrl: '/upfile/image/',
+            allowedFileExtensions: ['jpeg', 'jpg', 'png', 'gif', 'bmp'],
+            showUpload: true,
+            showCaption: false,
+            maxFileCount: 1,
+            autoReplace: true,
+            browseClass: "btn btn-primary",
+            previewFileIcon: "<i class='glyphicon glyphicon-kind'></i>",
+        });
     }
 </script>
 </body>

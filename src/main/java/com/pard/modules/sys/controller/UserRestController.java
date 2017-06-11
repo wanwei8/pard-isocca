@@ -4,8 +4,10 @@ import com.pard.common.constant.MessageConstant;
 import com.pard.common.controller.GenericController;
 import com.pard.common.datatables.DataTableRequest;
 import com.pard.common.datatables.DataTableResponse;
+import com.pard.common.logger.annotation.AccessLogger;
 import com.pard.common.message.ResponseMessage;
 import com.pard.common.utils.StringUtils;
+import com.pard.modules.sys.entity.Area;
 import com.pard.modules.sys.entity.Office;
 import com.pard.modules.sys.entity.User;
 import com.pard.modules.sys.service.UserService;
@@ -44,7 +46,9 @@ public class UserRestController extends GenericController implements MessageCons
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
         DataTableResponse<User> rst = userService.findAll(input);
 
-        return ResponseMessage.ok(rst).onlyData();
+        return ResponseMessage.ok(rst)
+                .exclude(User.class, "company.area", "office.area")
+                .onlyData();
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
@@ -73,5 +77,19 @@ public class UserRestController extends GenericController implements MessageCons
             return ResponseMessage.ok();
         }
         return ResponseMessage.error(USERNAME_EXISTS_FAILD);
+    }
+
+    @AccessLogger("禁用")
+    @RequestMapping(value = "/{id}/disable", method = RequestMethod.PUT)
+    public ResponseMessage disable(@PathVariable String id) {
+        userService.disableUser(id);
+        return ResponseMessage.ok();
+    }
+
+    @AccessLogger("启用")
+    @RequestMapping(value = "/{id}/enable", method = RequestMethod.PUT)
+    public ResponseMessage enable(@PathVariable String id) {
+        userService.enableUser(id);
+        return ResponseMessage.ok();
     }
 }

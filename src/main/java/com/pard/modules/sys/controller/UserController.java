@@ -1,6 +1,7 @@
 package com.pard.modules.sys.controller;
 
 import com.pard.common.controller.GenericController;
+import com.pard.common.logger.annotation.AccessLogger;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Office;
 import com.pard.modules.sys.entity.User;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(value = "${adminPath}/sys/user")
+@AccessLogger("用户管理")
 public class UserController extends GenericController {
 
     @Autowired

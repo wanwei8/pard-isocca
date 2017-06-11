@@ -15,14 +15,14 @@ public class User extends DataEntity<User> {
     /**
      * 归属公司
      */
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
     private Office company;
 
     /**
      * 归属部门
      */
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
     private Office office;
 

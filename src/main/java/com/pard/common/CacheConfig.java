@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Created by wawe on 17/5/27.
  */
 @Configuration
+@EnableCaching
 public class CacheConfig {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

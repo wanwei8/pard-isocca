@@ -11,7 +11,7 @@ import javax.persistence.Table;
  * Created by wawe on 17/5/16.
  */
 @Entity
-@Table(name = "bootstrap_icon_info")
+@Table(name = "icon_info")
 public class IconInfo extends DataEntity<IconInfo> {
 
     @Column(length = 200, nullable = false)

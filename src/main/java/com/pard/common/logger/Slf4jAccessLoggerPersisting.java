@@ -3,6 +3,7 @@ package com.pard.common.logger;
 import com.alibaba.fastjson.JSON;
 import com.pard.common.message.FastJsonHttpMessageConverter;
 import com.pard.modules.sys.entity.LoggerInfo;
+import com.pard.modules.sys.service.LoggerInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ public class Slf4jAccessLoggerPersisting implements AccessLoggerPersisting {
     @Autowired(required = false)
     private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
 
+    @Autowired
+    private LoggerInfoService loggerInfoService;
+
     @Override
     public void save(LoggerInfo loggerInfo) {
         if (logger.isInfoEnabled())
@@ -22,5 +26,7 @@ public class Slf4jAccessLoggerPersisting implements AccessLoggerPersisting {
                 logger.info(JSON.toJSONString(loggerInfo));
             else
                 logger.info(fastJsonHttpMessageConverter.converter(loggerInfo));
+
+        loggerInfoService.save(loggerInfo);
     }
 }

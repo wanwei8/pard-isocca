@@ -9,6 +9,8 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
  * Created by wawe on 17/5/22.
  */
 @CacheConfig(cacheNames = "dicts")
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Component("dictService")
 public class DictServiceImpl extends SimpleServiceImpl<Dict, DictRepository> implements DictService {
 
@@ -47,12 +50,14 @@ public class DictServiceImpl extends SimpleServiceImpl<Dict, DictRepository> imp
         return getRepository().findByType(type);
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void delete(String id) {
         super.delete(id);
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void save(Dict model) {

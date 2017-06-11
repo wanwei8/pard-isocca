@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
@@ -22,6 +23,7 @@ import java.util.List;
  * Created by wawe on 17/5/19.
  */
 @CacheConfig(cacheNames = "menus")
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Component("menuService")
 public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> implements MenuService {
     @Autowired
@@ -35,6 +37,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         return "menus";
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void updateSort(List<Menu> menus) {
@@ -72,6 +75,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         return getRepository().findAllMenu();
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void save(Menu menu) {
@@ -91,6 +95,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         super.save(menu);
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void delete(String id) {

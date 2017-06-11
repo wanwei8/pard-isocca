@@ -10,7 +10,6 @@ import org.springframework.cache.annotation.EnableCaching;
  */
 @ServletComponentScan
 @SpringBootApplication
-@EnableCaching
 public class PardApplication {
 
     public static void main(String[] args) {

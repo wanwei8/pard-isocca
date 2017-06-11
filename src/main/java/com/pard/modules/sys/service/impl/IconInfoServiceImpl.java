@@ -14,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -25,6 +27,7 @@ import java.util.List;
  * Created by wawe on 17/6/6.
  */
 @Component("iconInfoService")
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @CacheConfig(cacheNames = "iconInfoes")
 public class IconInfoServiceImpl implements IconInfoService {
 
@@ -57,6 +60,7 @@ public class IconInfoServiceImpl implements IconInfoService {
         return repository.findAll(specification, pageable);
     }
 
+    @Transactional
     @CacheEvict(allEntries = true)
     @Override
     public void save(List<IconInfo> iconInfos) {
