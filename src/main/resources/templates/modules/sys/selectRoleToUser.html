@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>分配角色</title>
+    <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-4">
+        <h3 class="header smaller lighter red">所在机构：</h3>
+        <div class="well">
+            <div id="treeOffice" class="scrollable"></div>
+        </div>
+    </div>
+    <div class="col-xs-4">
+        <h3 class="header smaller lighter blue">待选角色：</h3>
+        <div class="well">
+            <div id="treeRole" class="scrollable"></div>
+        </div>
+    </div>
+    <div class="col-xs-4">
+        <h3 class="header smaller lighter green">已选角色：</h3>
+        <div class="well">
+            <div id="treeSelected" class="scrollable"></div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/jstree/jstree.min.js}"></script>
+<script th:inline="javascript">
+
+    var pre_ids = [[${selectIds}]].split(",");
+    var ids = [[${selectIds}]].split(",");
+    var data = [[${roleList}]];
+    $(function () {
+        initOfficeTreeView();
+        initSelectedTreeView();
+    });
+    function doSubmit(callback) {
+        if (ids[0] == '') {
+            ids.shift();
+            pre_ids.shift();
+        }
+        if (pre_ids.sort().toString() == ids.sort().toString()) {
+            err("未给用户【[(${user.name})]】分配新角色！");
+            return false;
+        }
+        ;
+        // 执行保存
+        loading();
+        var idsArr = "";
+        for (var i = 0; i < ids.length; i++) {
+            idsArr = (idsArr + ids[i]) + (((i + 1) == ids.length) ? '' : ',');
+        }
+        $.ajax({
+            url: /*[[@{${@global.getApiPath()}+'/sys/user/assignrole'}]]*/ "/api/sys/user/assignrole",
+            type: "POST",
+            data: {
+                id: [[${user.id}]],
+                idsArr: idsArr
+            },
+            dataType: "json",
+            success: function (data) {
+                closeLoading();
+                if (data.success) {
+                    if (typeof callback === "function") {
+                        callback();
+                    }
+                    msg(data.message);
+                    var index = top.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    top.layer.close(index);
+                } else {
+                    err(data.message);
+                }
+            },
+            error: function (request, textStatus, errorThrow) {
+                closeLoading();
+                err("提交服务器失败");
+            }
+        });
+        return false;
+    }
+</script>
+<script type="text/javascript">
+    function initOfficeTreeView() {
+        var treeUrl = ctxApi + '/sys/office/tree?parent=[[${user.companyId}]]';
+
+        bindJstree('treeOffice', treeUrl, false, function () {
+            var tree = $('#treeOffice').jstree();
+            tree.open_all();
+        });
+
+        $('#treeOffice').on('changed.jstree', function (e, data) {
+            initRoleTreeView(data.selected);
+        });
+    }
+    function initRoleTreeView(oid) {
+        var treeUrl = ctxApi + '/sys/role/office/' + oid;
+
+        bindJstree('treeRole', treeUrl);
+        $('#treeRole').off('activate_node.jstree').on('activate_node.jstree', function (obj, e) {
+            var node = e.node;
+            if (node.id && $.inArray(String(node.id), ids) < 0) {
+                var tree = $('#treeSelected').jstree();
+                tree.create_node("#", {'id': node.id, 'text': node.text, 'icon': node.icon}, 'last');
+                ids.push(String(node.id));
+            }
+        });
+    }
+    function initSelectedTreeView() {
+        $('#treeSelected').jstree({
+            'core': {
+                'check_callback': true,
+                'data': data,
+                'multiple': false,
+                'themes': {
+                    'responsive': false,
+                    'name': 'proton',
+                },
+                'strings': {
+                    'Loading ...': '数据正在加载中...'
+                }
+            }
+        }).on('activate_node.jstree', function (obj, e) {
+            var node = e.node;
+            if (node.id && $.inArray(String(node.id), pre_ids) < 0) {
+                var tree = $('#treeSelected').jstree();
+                tree.delete_node(node);
+                ids.splice($.inArray(String(node.id), ids), 1);
+            } else {
+                err('角色原有成员不能清除！');
+            }
+        });
+    }
+</script>
+</body>
+</html>

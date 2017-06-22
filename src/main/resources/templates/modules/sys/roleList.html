@@ -1,0 +1,238 @@
+<html xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+<head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
+    <title>系统角色管理</title>
+    <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
+</head>
+
+<div class="page-header">
+    <h1>
+        系统角色管理
+        <small>
+            <i class="ace-icon fa fa-angle-double-right"></i>
+            列表
+        </small>
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-sm-3 col-xs-12 widget-container-col">
+        <div class="widget-box">
+            <div class="widget-header">
+                <h5 class="widget-title">
+                    <i class="ace-icon fa fa-filter"></i>
+                    按组织机构查看
+                </h5>
+            </div>
+            <div class="widget-body">
+                <div class="widget-main">
+                    <div id="treeOffice" class="scrollable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-9 col-xs-12">
+        <form id="searchForm" class="breadcrumb form-inline" method="post">
+            <div class="form-group">
+                <label for="name">角色名称</label>
+                <input type="text" class="form-control" maxlength="50" id="name" name="name"/>
+            </div>
+
+            <button class="btn btn-primary btn-sm" onclick="search()" type="button">
+                <i class="ace-icon fa fa-search"></i>查询
+            </button>
+            <button class="btn btn-sm" id="reset" type="button">
+                <i class="ace-icon fa fa-refresh"></i>重置
+            </button>
+        </form>
+        <div class="space-4"></div>
+        <table id="tbl" class="table table-striped table-bordered table-hover" cellspacing="0"
+               width="100%"></table>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    var editFormUrl = ctxAdmin + "/sys/role/form";
+    var scripts = [null,
+        /*[[@{/components/jstree/jstree.min.js}]]*/ null,
+        /*[[@{/components/dataTables/js/jquery.dataTables.min.js}]]*/ null,
+        /*[[@{/components/dataTables/js/dataTables.bootstrap.min.js}]]*/ null,
+        null];
+    $('.page-content-area').ace_ajax('loadScripts', scripts, function () {
+        $(function () {
+            initPageScript();
+            initTreeView();
+            initDataTableView();
+            $('#reset').on('click', reset);
+        });
+
+    });
+    function initDataTableView() {
+        var tableUrl = /*[[@{${@global.getApiPath()}+'/sys/role/page'}]]*/ '/api';
+
+        $('#tbl').DataTable({
+            'ajax': {
+                'url': tableUrl,
+            },
+            scrollY: 300,
+            scrollCollapse: true,
+            'rowId': 'id',
+            'columns': [
+                {
+                    'data': 'id',
+                    'visible': false,
+                    'title': 'ID',
+                    'orderable': false,
+                }, {
+                    'data': 'companyId',
+                    'visible': false,
+                    'title': 'companyId',
+                    'orderable': false,
+                }, {
+                    'data': 'officeId',
+                    'visible': false,
+                    'title': 'officeId',
+                    'orderable': false,
+                }, {
+                    'data': 'name',
+                    'title': '角色名称',
+                    'orderable': false,
+                }, {
+                    'data': 'companyName',
+                    'title': '所属公司',
+                    'orderable': false,
+                }, {
+                    'data': 'officeName',
+                    'title': '所属部门',
+                    'orderable': false,
+                }, {
+                    'data': 'useable',
+                    'title': '是否可用',
+                    'orderable': false,
+                    'width': '60px',
+                    "render": function (data, type, row) {
+                        if (data == "1")
+                            return '<span class="label label-success arrowed">可用</span>';
+                        return '<span class="label label-danger arrowed">禁用</span>';
+                    }
+                }, {
+                    'data': null,
+                    'title': '操作',
+                    'defaultContent': '<div class="btn-group" >' +
+                    makeTableViewSmbtn() +
+                    makeTableEditSmbtn() +
+                    makeTableDelSmbtn() +
+                    makeTableAuthSmbtn() +
+                    makeTableUserSmbtn() +
+                    '</div>',
+                    'orderable': false,
+                    'width': '150px'
+                },
+            ],
+            'initComplete': function () {
+                $("div .toolbar").html('<div class="btn-group">' +
+                    createToolbarAddBtn() +
+                    createToolbarRefBtn() +
+                    '</div>'
+                );
+            }
+        });
+
+        $('#tbl tbody').on('click', 'a#viewrow', view);
+        $('#tbl tbody').on('click', 'a#editrow', edit);
+        $('#tbl tbody').on('click', 'a#delrow', del);
+        $('#tbl tbody').on('click', 'a#authrow', auth);
+        $('#tbl tbody').on('click', 'a#userrow', assign);
+    }
+</script>
+<script type="text/javascript">
+    <![CDATA[
+    function initTreeView() {
+        var treeUrl = ctxApi + "/sys/office/tree";
+        bindJstree('treeOffice', treeUrl, false);
+        $('#treeOffice').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables(data.selected);
+        });
+    }
+    function refDataTables(oid) {
+        var tab = $('#tbl').DataTable();
+        tab.columns(1).search(oid).columns(2).search(oid).draw();
+    }
+    function add() {
+        var treeObj = $('#treeOffice').jstree();
+        var nodes = treeObj.get_selected();
+        var url = editFormUrl;
+        if (nodes.length > 0) {
+            url += '?office.id=' + (treeObj.get_node(nodes[0]).id);
+        }
+        openDialog("新增角色信息", url, "800px", "500px", refresh);
+    }
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialogView('查看角色信息', url, '800px', '500px')
+    }
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialog("修改角色信息", url, "800px", "500px", refresh);
+    }
+    function del() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxApi + '/sys/role/' + data.id;
+        confirmx('确认要删除该记录码？', function () {
+            loading();
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                dataType: "json",
+                success: function (data) {
+                    closeLoading();
+                    if (data.code == 100) {
+                        msg(data.message);
+                        refresh();
+                    } else {
+                        err(data.message);
+                    }
+                },
+                error: function (request, textStatus, errorThrow) {
+                    err("提交服务器失败");
+                }
+            });
+        });
+    }
+    function auth() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxAdmin + "/sys/role/auth?id=" + data.id;
+        openDialog("权限设置", url, "350px", "700px");
+    }
+    function assign() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxAdmin + "/sys/role/assign?id=" + data.id;
+        openDialogView("分配用户", url, "800px", "600px");
+    }
+    function refresh() {
+        $('#tbl').DataTable().ajax.reload();
+    }
+    function reset() {
+        $('#name').val("");
+        $('#loginName').val("");
+        $('#no').val("");
+        search();
+    }
+    function search() {
+        var name = $('#name').val() || "";
+        var tab = $('#tbl').DataTable();
+        tab.columns().every(function (p1, p2, p3) {
+            var column = this
+            column.search('');
+        });
+
+        if (isEmpty(name)) {
+            initTreeView();
+        } else {
+            tab.columns(3).search(name).draw();
+        }
+    }
+    ]]>
+</script>

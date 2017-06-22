@@ -3,14 +3,16 @@ package com.pard.modules.sys.controller;
 import com.google.code.kaptcha.Producer;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.pard.common.controller.GenericController;
 import com.pard.common.logger.annotation.AccessLogger;
-import com.pard.common.service.BaseService;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Menu;
-import com.pard.modules.sys.service.MenuService;
+import com.pard.modules.sys.entity.User;
+import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by wawe on 17/4/26.
@@ -34,8 +37,6 @@ public class LoginController extends GenericController {
 
     @Autowired
     private Producer captchaProducer;
-    @Autowired
-    private MenuService menuService;
 
     private Ordering<Menu> orderMenu = new Ordering<Menu>() {
         public int compare(Menu menu1, Menu menu2) {
@@ -89,12 +90,17 @@ public class LoginController extends GenericController {
 
     @RequestMapping(value = {"/", "/index"})
     public String index(HttpServletRequest request, HttpServletResponse response, Model model) {
-        List<Menu> menus = menuService.findAllMenu();
+        Set<Menu> menus = Sets.filter(UserUtils.getUser().getMenus(), new Predicate<Menu>() {
+            @Override
+            public boolean apply(Menu menu) {
+                return SHOW.equals(menu.getIsShow());
+            }
+        });
         model.addAttribute("menu", makeIndexMenu(menus, null));
         return "modules/sys/sysIndex";
     }
 
-    private String makeIndexMenu(List<Menu> menus, Menu parent) {
+    private String makeIndexMenu(Set<Menu> menus, Menu parent) {
         StringBuilder sbHtml = new StringBuilder();
 
         List<Menu> childs = orderMenu.sortedCopy(Collections2.filter(menus, new Predicate<Menu>() {
@@ -108,13 +114,13 @@ public class LoginController extends GenericController {
         }));
 
         for (Menu m : childs) {
-            String url = getUrl(m.getHref());
+            String url = getUrl(m);
             sbHtml.append("<li class='hover'>");
             String childHtml = makeIndexMenu(menus, m);
             if (StringUtils.isBlank(url)) {
                 sbHtml.append("<a href='#' " + (StringUtils.isBlank(childHtml) ? "" : "class='dropdown-toggle'") + ">");
             } else {
-                sbHtml.append("<a data-url='" + url + "' href='#" + url + "'>");
+                sbHtml.append(url);
             }
             sbHtml.append("<i class='menu-icon " + (StringUtils.isBlank(m.getIcon()) ? " fa fa-caret-right" : m.getIcon()) + "'></i>");
             if (StringUtils.isBlank(childHtml)) {
@@ -135,9 +141,15 @@ public class LoginController extends GenericController {
         return sbHtml.toString();
     }
 
-    private String getUrl(String href) {
-        if (StringUtils.isBlank(href)) return "";
-        String url = href.trim();
-        return adminPath + "/" + (url.indexOf("/") == 0 ? url.substring(1) : url);
+    private String getUrl(Menu menu) {
+        if (StringUtils.isBlank(menu.getHref())) return "";
+
+        String href = menu.getHref().trim();
+
+        if (StringUtils.isNotBlank(menu.getTarget()) && !"mainFrame".equals(menu.getTarget())) {
+            return "<a href='" + href + "' target='" + menu.getTarget() + "'>";
+        }
+        String url = adminPath + "/" + (href.indexOf("/") == 0 ? href.substring(1) : href);
+        return "<a data-url='" + url + "' href='#" + url + "'>";
     }
 }

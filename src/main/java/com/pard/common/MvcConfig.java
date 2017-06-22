@@ -103,7 +103,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter implements ApplicationCon
         return kaptcha;
     }
 
-    @Bean
+   /* @Bean
     public EmbeddedServletContainerCustomizer containerCustomizer() {
         return new EmbeddedServletContainerCustomizer() {
             @Override
@@ -114,7 +114,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter implements ApplicationCon
                 container.addErrorPages(new ErrorPage(Throwable.class, "/error/500"));
             }
         };
-    }
+    }*/
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

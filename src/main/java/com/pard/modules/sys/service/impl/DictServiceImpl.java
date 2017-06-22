@@ -29,16 +29,11 @@ public class DictServiceImpl extends SimpleServiceImpl<Dict, DictRepository> imp
     }
 
     @Override
-    protected String getCacheName() {
-        return "dicts";
-    }
-
-    @Override
     public int findMaxSortByType(String type) {
         return repository.findMaxSortByType(type);
     }
 
-    @Cacheable
+    @Cacheable(value = "distinct_dict_type_cache")
     @Override
     public List<String> findDistinctDictType() {
         return getRepository().findDistinctDictType();
@@ -51,14 +46,14 @@ public class DictServiceImpl extends SimpleServiceImpl<Dict, DictRepository> imp
     }
 
     @Transactional
-    @CacheEvict(allEntries = true)
+    @CacheEvict(allEntries = true, cacheNames = {"distinct_dict_type_cache"})
     @Override
     public void delete(String id) {
         super.delete(id);
     }
 
     @Transactional
-    @CacheEvict(allEntries = true)
+    @CacheEvict(allEntries = true, cacheNames = {"distinct_dict_type_cache"})
     @Override
     public void save(Dict model) {
         super.save(model);

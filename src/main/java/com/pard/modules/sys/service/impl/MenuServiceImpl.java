@@ -4,6 +4,8 @@ import com.pard.common.service.impl.TreeServiceImpl;
 import com.pard.common.utils.IdGen;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Menu;
+import com.pard.modules.sys.entity.Role;
+import com.pard.modules.sys.entity.User;
 import com.pard.modules.sys.repository.MenuRepository;
 import com.pard.modules.sys.service.MenuService;
 import com.pard.modules.sys.utils.UserUtils;
@@ -11,11 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Date;
 import java.util.List;
 
@@ -32,9 +39,10 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         this.repository = repository;
     }
 
+    @Cacheable
     @Override
-    protected String getCacheName() {
-        return "menus";
+    public Menu findOne(String id) {
+        return getRepository().findOne(id);
     }
 
     @Transactional
@@ -53,8 +61,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
     @Override
     public List<Menu> findByParentId(String pid) {
         StringBuilder sbHql = new StringBuilder();
-        sbHql.append("select new Menu(id, parent.id, name, href, isShow, sort, permission, icon)")
-                .append(" from Menu m")
+        sbHql.append(" from Menu m")
                 .append(" where m.delFlag = :delFlag")
                 .append(" and m.parent ")
                 .append((StringUtils.isBlank(pid) || "0".equals(pid)) ? " is null" : " = :parent")
@@ -75,6 +82,12 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
         return getRepository().findAllMenu();
     }
 
+    @Cacheable
+    @Override
+    public List<Menu> findByUser(User user) {
+        return getRepository().findByUser(user.getId());
+    }
+
     @Transactional
     @CacheEvict(allEntries = true)
     @Override
@@ -83,7 +96,7 @@ public class MenuServiceImpl extends TreeServiceImpl<Menu, MenuRepository> imple
             if (menu.getParent().getId().equals("0")) {
                 menu.setParent(null);
             } else {
-                Menu parent = getRepository().findOne(menu.getParentId());
+                Menu parent = findOne(menu.getParentId());
                 if (parent != null) {
                     menu.setParentIds(StringUtils.isNotBlank(parent.getParentIds()) ?
                             parent.getParentIds() + parent.getId() + ";" :

@@ -1,9 +1,13 @@
 package com.pard.modules.sys.service;
 
+import com.pard.common.security.CustomUserDetails;
 import com.pard.common.service.BaseService;
 import com.pard.common.service.TreeService;
 import com.pard.modules.sys.entity.Menu;
+import com.pard.modules.sys.entity.Role;
+import com.pard.modules.sys.entity.User;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,4 +19,6 @@ public interface MenuService extends TreeService<Menu> {
     List<Menu> findByParentId(String pid);
 
     List<Menu> findAllMenu();
+
+    List<Menu> findByUser(User user);
 }

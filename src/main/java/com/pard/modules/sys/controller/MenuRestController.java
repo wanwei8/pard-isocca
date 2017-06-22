@@ -2,6 +2,7 @@ package com.pard.modules.sys.controller;
 
 import com.google.common.collect.Lists;
 import com.pard.common.constant.MessageConstant;
+import com.pard.common.constant.StringConstant;
 import com.pard.common.controller.GenericController;
 import com.pard.common.datatables.Column;
 import com.pard.common.datatables.DataTableRequest;
@@ -15,25 +16,19 @@ import com.pard.common.utils.IdGen;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.IconInfo;
 import com.pard.modules.sys.entity.Menu;
-import com.pard.modules.sys.repository.IconInfoRepository;
 import com.pard.modules.sys.service.IconInfoService;
 import com.pard.modules.sys.service.MenuService;
+import com.pard.modules.sys.utils.UserUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.validation.Valid;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by wawe on 17/5/15.
@@ -48,19 +43,20 @@ public class MenuRestController extends GenericController implements MessageCons
     private MenuService menuService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ResponseMessage getAreaList(@Valid DataTableRequest input) {
-        Column column = input.getColumn("parent.id");
-        String pid = column.getSearch().getValue();
-        if (StringUtils.isBlank(pid))
-            pid = "0";
-        List<Menu> menus = menuService.findByParentId(pid);
-
+    public ResponseMessage getMenuList(@Valid DataTableRequest input) {
+        Column column = input.getColumn("parentId");
         DataTableResponse<Menu> r = new DataTableResponse<>();
         r.setDraw(input.getDraw());
-        r.setData(menus);
-        r.setRecordsTotal(menus.size());
-        r.setRecordsFiltered(menus.size());
-        return ResponseMessage.ok(r).onlyData();
+        String pid = column.getSearch().getValue();
+        if (StringUtils.isNotBlank(pid)) {
+            List<Menu> menus = menuService.findByParentId(pid);
+
+            r.setData(menus);
+            r.setRecordsTotal(menus.size());
+            r.setRecordsFiltered(menus.size());
+        }
+        return ResponseMessage.ok(r).include(Menu.class, "id", "parentId", "name", "href", "isShow",
+                "sort", "permission", "icon", "target").onlyData();
     }
 
     @RequestMapping(value = "select2tree", method = RequestMethod.POST)
@@ -80,6 +76,12 @@ public class MenuRestController extends GenericController implements MessageCons
     @RequestMapping(value = "/tree", method = RequestMethod.GET)
     public ResponseMessage getJsTreeList(@RequestParam(name = "all", defaultValue = "0") int all) {
         List<Menu> lst = menuService.findAllMenu();
+        lst.removeIf(new java.util.function.Predicate<Menu>() {
+            @Override
+            public boolean test(Menu menu) {
+                return StringConstant.HIDE.equals(menu.getIsShow());
+            }
+        });
         List<JsTree> r = Lists.newArrayList();
         if (all == 1) {
             JsTree root = new JsTree();
@@ -95,6 +97,26 @@ public class MenuRestController extends GenericController implements MessageCons
             tree.setId(menu.getId());
             String pid = menu.getParentId();
             if (all != 1 && "0".equals(pid)) {
+                pid = "#";
+            }
+            tree.setParent(pid);
+            tree.setText(menu.getName());
+            tree.setIcon("fa fa-file yellow");
+            tree.getState().setOpened(StringUtils.isEmpty(menu.getParentIds()));
+            r.add(tree);
+        }
+        return ResponseMessage.ok(r).onlyData();
+    }
+
+    @RequestMapping(value = "/usermenutree", method = RequestMethod.GET)
+    public ResponseMessage getUserMenuTree() {
+        Set<Menu> menus = UserUtils.getUser().getMenus();
+        List<JsTree> r = Lists.newArrayList();
+        for (Menu menu : menus) {
+            JsTree tree = new JsTree();
+            tree.setId(menu.getId());
+            String pid = menu.getParentId();
+            if ("0".equals(pid)) {
                 pid = "#";
             }
             tree.setParent(pid);
@@ -144,7 +166,7 @@ public class MenuRestController extends GenericController implements MessageCons
         } catch (ChildNodeExistsException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.error("Area delete faild", ex);
+            logger.error("Menu delete faild", ex);
             return ResponseMessage.error(DELETE_FAILD);
         }
         return ResponseMessage.ok(DELETE_SUCCESS);

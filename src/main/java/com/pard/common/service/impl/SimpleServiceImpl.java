@@ -32,9 +32,6 @@ import javax.persistence.criteria.Root;
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTablesRepository> implements BaseService<T> {
 
-    @Autowired
-    protected CacheManager cacheManager;
-
     protected R repository;
     /**
      * 日志对象
@@ -44,8 +41,6 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
     @PersistenceContext
     protected EntityManager entityManager;
 
-    protected abstract String getCacheName();
-
     protected R getRepository() {
         return repository;
     }
@@ -54,7 +49,7 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
 
     @Override
     public T findOne(String id) {
-        return (T) repository.findOne(id);
+        return (T) getRepository().findOne(id);
     }
 
     @Override
@@ -98,12 +93,5 @@ public abstract class SimpleServiceImpl<T extends BaseEntity, R extends DataTabl
             model.preInsert();
         model.preUpdate();
         repository.save(model);
-    }
-
-    public void clearCache() {
-        Cache cache = cacheManager.getCache(getCacheName());
-        if (cache != null) {
-            cache.clear();
-        }
     }
 }

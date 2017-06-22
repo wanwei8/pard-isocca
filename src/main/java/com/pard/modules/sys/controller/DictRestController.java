@@ -10,6 +10,7 @@ import com.pard.common.message.Select2;
 import com.pard.modules.sys.entity.Dict;
 import com.pard.modules.sys.service.DictService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,12 +29,15 @@ public class DictRestController extends GenericController implements MessageCons
     @Autowired
     private DictService dictService;
 
+    @PreAuthorize("authenticated and hasAuthority('sys:dict:view')")
     @RequestMapping(value = "/page", method = RequestMethod.GET)
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
         DataTableResponse<Dict> dicts = dictService.findAll(input);
-        return ResponseMessage.ok(dicts).onlyData();
+        return ResponseMessage.ok(dicts).include(Dict.class, "id", "value", "label", "type",
+                "description", "sort").onlyData();
     }
 
+    @PreAuthorize("authenticated and hasAnyAuthority('sys:dict:edit','sys:dict:add')")
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseMessage save(Dict dict) {
         try {
@@ -45,6 +49,7 @@ public class DictRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("authenticated and hasAnyAuthority('sys:dict:del')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
         try {

@@ -26,6 +26,17 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">目标</label>
+                <div class="col-sm-6">
+                    <select id="target" th:field="*{target}" class="form-control">
+                        <option value="">无</option>
+                        <option value="mainFrame">mainFrame</option>
+                        <option value="_blank">blank</option>
+                        <option value="_self">self</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-sm-3 control-label no-padding-right">菜单是否可见<span class="red">*</span></label>
                 <div class="col-sm-6">
                     <select id="isShow" name="isShow" th:value="*{isShow}" class="form-control required"
@@ -85,6 +96,7 @@
     $(function () {
         initPageScript();
         select2Tree([[${menu.parent.id}]], [[${menu.id}]]);
+        $('#target').select2();
         bindSelIcon();
         buildSelect([[${menu.isShow}]]);
         validateForm = $("#edtForm").validate({

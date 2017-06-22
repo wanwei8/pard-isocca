@@ -178,7 +178,7 @@
 
     function refreshTypeSelect() {
         var url = ctxApi + "/sys/dict/type";
-        bindSelect('type', url, true);
+        bindSelect('type', url, '', true);
     }
     function search() {
         var type = $('#type').val() || "-1";

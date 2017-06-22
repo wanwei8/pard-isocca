@@ -1,6 +1,5 @@
 package com.pard.modules.sys.service.impl;
 
-import com.pard.common.constant.StringConstant;
 import com.pard.common.service.impl.TreeServiceImpl;
 import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Area;
@@ -32,17 +31,11 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
         this.repository = repository;
     }
 
-    @Override
-    protected String getCacheName() {
-        return "areas";
-    }
-
     @Cacheable
     @Override
     public List<Area> findByParentId(String pid) {
         StringBuilder sbHql = new StringBuilder();
-        sbHql.append("select new Area(id, parent.id, name, code, type, sort, remarks)")
-                .append(" from Area a")
+        sbHql.append(" from Area a")
                 .append(" where a.delFlag = :delFlag")
                 .append(" and a.parent ")
                 .append((StringUtils.isBlank(pid) || "0".equals(pid)) ? " is null" : " = :parent")
@@ -71,7 +64,7 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
             if (area.getParent().getId().equals("0")) {
                 area.setParent(null);
             } else {
-                Area parent = getRepository().findOne(area.getParentId());
+                Area parent = findOne(area.getParentId());
                 if (parent != null) {
                     area.setParentIds(StringUtils.isNotBlank(parent.getParentIds()) ?
                             parent.getParentIds() + parent.getId() + ";" :
@@ -80,7 +73,6 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
                 }
             }
         }
-        area.setUpdateBy(UserUtils.getUser());
         super.save(area);
     }
 
@@ -95,7 +87,6 @@ public class AreaServiceImpl extends TreeServiceImpl<Area, AreaRepository> imple
             query.setParameter("id", area.getId());
             query.executeUpdate();
         }
-        clearCache();
     }
 
     @Transactional

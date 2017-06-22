@@ -1,25 +1,26 @@
 package com.pard.modules.sys.controller;
 
+import com.google.common.collect.Lists;
 import com.pard.common.constant.MessageConstant;
 import com.pard.common.controller.GenericController;
 import com.pard.common.datatables.DataTableRequest;
 import com.pard.common.datatables.DataTableResponse;
 import com.pard.common.logger.annotation.AccessLogger;
+import com.pard.common.message.JsTree;
 import com.pard.common.message.ResponseMessage;
 import com.pard.common.utils.StringUtils;
-import com.pard.modules.sys.entity.Area;
 import com.pard.modules.sys.entity.Office;
+import com.pard.modules.sys.entity.Role;
 import com.pard.modules.sys.entity.User;
+import com.pard.modules.sys.service.RoleService;
 import com.pard.modules.sys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.validation.Valid;
+import java.io.File;
+import java.util.List;
 
 /**
  * Created by wawe on 17/5/22.
@@ -29,6 +30,10 @@ import javax.validation.Valid;
 public class UserRestController extends GenericController implements MessageConstant {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleService roleService;
+    @Value("${pard.fileUploadPath}")
+    private String ROOT = "/Users/wawe/upfile/";
 
     @ModelAttribute
     public User get(@RequestParam(required = false) String id) {
@@ -44,10 +49,11 @@ public class UserRestController extends GenericController implements MessageCons
 
     @RequestMapping(value = "page", method = RequestMethod.GET)
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
-        DataTableResponse<User> rst = userService.findAll(input);
+        DataTableResponse<User> rst = userService.findAllUser(input);
 
         return ResponseMessage.ok(rst)
-                .exclude(User.class, "company.area", "office.area")
+                .include(User.class, "id", "companyId", "officeId", "no", "loginName",
+                        "name", "loginFlag", "companyName", "officeName")
                 .onlyData();
     }
 
@@ -58,6 +64,7 @@ public class UserRestController extends GenericController implements MessageCons
             if (!checkName.isSuccess()) {
                 return checkName;
             }
+            deletePhoto(user);
             user.setCompany(new Office(request.getParameter("company.id")));
             user.setOffice(new Office(request.getParameter("office.id")));
 
@@ -91,5 +98,60 @@ public class UserRestController extends GenericController implements MessageCons
     public ResponseMessage enable(@PathVariable String id) {
         userService.enableUser(id);
         return ResponseMessage.ok();
+    }
+
+    private void deletePhoto(User user) {
+        try {
+            if (StringUtils.isNotBlank(user.getOldPhoto()) && !user.getOldPhoto().equals(user.getPhoto())) {
+                StringBuilder sbPath = new StringBuilder();
+                sbPath.append(ROOT.charAt(ROOT.length() - 1) == '/' ? ROOT.substring(0, ROOT.length() - 1) : ROOT)
+                        .append("/").append(user.getOldPhoto().replaceFirst("/upload", ""));
+                org.apache.commons.io.FileUtils.forceDelete(new File(sbPath.toString()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
+        try {
+            userService.deleteUser(id);
+        } catch (Exception ex) {
+            logger.error("User delete faild", ex);
+            return ResponseMessage.error(DELETE_FAILD);
+        }
+        return ResponseMessage.ok(DELETE_SUCCESS);
+    }
+
+    @RequestMapping(value = "/officeuser/{id}", method = RequestMethod.GET)
+    public ResponseMessage getOfficeUser(@PathVariable(name = "id", required = true) String id) {
+        List<User> users = userService.findByOffice(id);
+        List<JsTree> r = Lists.newArrayList();
+        users.forEach(u -> {
+            JsTree tree = new JsTree();
+            tree.setParent("#");
+            tree.setId(u.getId());
+            tree.setText(u.getName());
+            tree.setIcon("fa fa-user yellow");
+
+            r.add(tree);
+        });
+
+        return ResponseMessage.ok(r).onlyData();
+    }
+
+    @RequestMapping(value = "assignrole", method = RequestMethod.POST)
+    public ResponseMessage assignRole(User user, String[] idsArr) {
+        int newNum = 0;
+        for (int i = 0; i < idsArr.length; i++) {
+            Role role = roleService.findOne(idsArr[i]);
+            if (null != role && !role.getUserList().contains(user)) {
+                role.getUserList().add(user);
+                roleService.save(role);
+                newNum++;
+            }
+        }
+        return ResponseMessage.ok("已成功分配 " + newNum + " 个角色");
     }
 }

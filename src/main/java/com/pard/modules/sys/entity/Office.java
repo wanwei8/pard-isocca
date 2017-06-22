@@ -17,6 +17,7 @@ public class Office extends TreeEntity<Office> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
+    @JSONField(serialize = false)
     private Area area;        // 归属区域
 
     @Column(length = 100)
@@ -51,10 +52,12 @@ public class Office extends TreeEntity<Office> {
 
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn
+    @JSONField(serialize = false)
     private User primaryPerson;//主负责人
 
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn
+    @JSONField(serialize = false)
     private User deputyPerson;//副负责人
 
     @Transient
@@ -73,6 +76,11 @@ public class Office extends TreeEntity<Office> {
         super(id);
     }
 
+    public Office(String id, String name) {
+        this(id);
+        this.name = name;
+    }
+
     public Office(String id, String pid, String name) {
         this(id);
         if (StringUtils.isNotBlank(pid)) {
@@ -87,13 +95,15 @@ public class Office extends TreeEntity<Office> {
         this.type = type;
     }
 
-    public Office(String id, String pid, String name, String code, String type, Integer sort, String useable, String remarks) {
+    public Office(String id, String pid, String name, String code, String type, Integer sort,
+                  String useable, String remarks, String parentIds) {
         this(id, pid, name);
         this.code = code;
         this.type = type;
         this.sort = sort;
         this.useable = useable;
         this.remarks = remarks;
+        this.parentIds = parentIds;
     }
 
     @Override
@@ -231,7 +241,16 @@ public class Office extends TreeEntity<Office> {
         this.typeLabel = typeLabel;
     }
 
+    public String getAreaId() {
+        return area != null ? area.getId() : "";
+    }
+
+    public String getAreaName() {
+        return area != null ? area.getName() : "";
+    }
+
     public String getIcon() {
+        if (StringUtils.isBlank(type)) type = "0";
         switch (type) {
             case "1":
                 return "fa fa-sitemap yellow";

@@ -15,8 +15,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .anyRequest().authenticated()
                 .and().formLogin().usernameParameter("username").passwordParameter("password").loginProcessingUrl("/login").loginPage("/login").permitAll().defaultSuccessUrl("/", true).authenticationDetailsSource(authenticationDetailsSource)
-                .and().logout().logoutUrl("/logout").permitAll()
+                .and().logout().logoutUrl("/logout").deleteCookies("JSESSIONID").permitAll()
                 .and().sessionManagement().sessionFixation().migrateSession().maximumSessions(1).expiredUrl("/login?error=expired")
                 .and()
                 .and().exceptionHandling().authenticationEntryPoint(ajaxAwareAuthenticationEntryPoint())
@@ -88,6 +90,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AjaxAwareAuthenticationEntryPoint ajaxAwareAuthenticationEntryPoint() {
         AjaxAwareAuthenticationEntryPoint point = new AjaxAwareAuthenticationEntryPoint("/login");
+        point.setUseForward(true);
         return point;
     }
+
 }

@@ -66,7 +66,7 @@
                     'visible': false,
                     'title': 'ID'
                 }, {
-                    'data': 'parent.id',
+                    'data': 'parentId',
                     'visible': false,
                     'title': 'PID'
                 }, {
@@ -137,8 +137,9 @@
             var obj = treeObj.get_node(pid);
             treeObj.select_node(obj, false, false);
         });
-        $('#tree').on('changed.jstree', function (e, data) {
-            refDataTables(data.selected);
+        $('#tree').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables(data.selected);
         });
     }
     function refDataTables(pid) {
@@ -163,7 +164,7 @@
             var node = treeObj.get_node(nodes[0]);
             url += "?parent.id=" + node.id + "&parent.name=" + node.name;
         }
-        openDialog("新增机构", url, "800px", "500px", initAreaTreeView);
+        openDialog("新增机构", url, "800px", "500px", refreshCurrTreeNode);
     }
     function del() {
         var data = $('#tbl').DataTable().row($(this).parents('tr')).data();

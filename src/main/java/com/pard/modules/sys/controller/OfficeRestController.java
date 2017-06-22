@@ -38,32 +38,51 @@ public class OfficeRestController extends GenericController implements MessageCo
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ResponseMessage getAreaList(@Valid DataTableRequest input) {
-        Column column = input.getColumn("parent.id");
-        List<Office> offices = officeService.findByParentId(column.getSearch().getValue());
-        Set<Dict> dicts = Sets.newHashSet(dictService.findByType("sys_office_type"));
-        for (Office a : offices) {
-            Set<Dict> filter = Sets.filter(dicts, new com.google.common.base.Predicate<Dict>() {
-                @Override
-                public boolean apply(Dict dict) {
-                    return dict.getValue().equals(a.getType());
-                }
-            });
-            if (!filter.isEmpty()) {
-                Dict dict = filter.iterator().next();
-                a.setTypeLabel(dict.getLabel());
-            }
-        }
+        Column column = input.getColumn("parentId");
         DataTableResponse<Office> r = new DataTableResponse<>();
         r.setDraw(input.getDraw());
-        r.setData(offices);
-        r.setRecordsTotal(offices.size());
-        r.setRecordsFiltered(offices.size());
-        return ResponseMessage.ok(r).onlyData();
+        String pid = column.getSearch().getValue();
+        if (StringUtils.isNotBlank(pid)) {
+            List<Office> offices = officeService.findByParentId(pid);
+            Set<Dict> dicts = Sets.newHashSet(dictService.findByType("sys_office_type"));
+            for (Office a : offices) {
+                Set<Dict> filter = Sets.filter(dicts, new com.google.common.base.Predicate<Dict>() {
+                    @Override
+                    public boolean apply(Dict dict) {
+                        return dict.getValue().equals(a.getType());
+                    }
+                });
+                if (!filter.isEmpty()) {
+                    Dict dict = filter.iterator().next();
+                    a.setTypeLabel(dict.getLabel());
+                }
+            }
+            r.setData(offices);
+            r.setRecordsTotal(offices.size());
+            r.setRecordsFiltered(offices.size());
+        }
+        return ResponseMessage.ok(r).include(Office.class, "id", "parentId", "name", "code", "typeLabel",
+                "sort", "useable", "remarks").onlyData();
     }
 
     @RequestMapping(value = "/tree", method = RequestMethod.GET)
-    public ResponseMessage getJsTreeList(@RequestParam(name = "isall", defaultValue = "0") int isAll) {
+    public ResponseMessage getJsTreeList(@RequestParam(name = "isall", defaultValue = "0") int isAll,
+                                         @RequestParam(name = "parent", defaultValue = "") String officeId) {
         List<Office> lst = Lists.newArrayList(officeService.findAllWithTree());
+        if (StringUtils.isNotBlank(officeId)) {
+            lst.removeIf(new java.util.function.Predicate<Office>() {
+                @Override
+                public boolean test(Office office) {
+                    if (office == null) return true;
+                    if (officeId.equals(office.getId())) return false;
+                    if (office.getParentIds() != null &&
+                            office.getParentIds().contains(officeId))
+                        return false;
+
+                    return true;
+                }
+            });
+        }
         List<JsTree> r = Lists.newArrayList();
         if (isAll == 1) {
             JsTree root = new JsTree();
@@ -78,6 +97,9 @@ public class OfficeRestController extends GenericController implements MessageCo
             JsTree tree = new JsTree();
             tree.setId(office.getId());
             String pid = office.getParentId();
+            if (StringUtils.isNotBlank(officeId) && officeId.equals(office.getId())) {
+                pid = "#";
+            }
             if (isAll != 1 && "0".equals(pid)) {
                 pid = "#";
             }
@@ -87,6 +109,8 @@ public class OfficeRestController extends GenericController implements MessageCo
             tree.setIcon(office.getIcon());
             r.add(tree);
         }
+        if (!r.isEmpty())
+            r.get(0).getState().setSelected(true);
         return ResponseMessage.ok(r).onlyData();
     }
 

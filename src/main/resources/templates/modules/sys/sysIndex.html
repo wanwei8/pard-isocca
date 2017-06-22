@@ -184,9 +184,8 @@
                         <img class="nav-user-photo" src="/css/images/user.jpg" th:src="@{''+${user.getPhoto()}}"
                              alt="照片"/>
                         <span class="user-info">
-                                    <small>欢迎使用,</small>
-                                    <span th:text="${user.getName()}"></span>
-                                </span>
+                            <small>欢迎使用,</small>[[${user.getName()}]]
+                        </span>
 
                         <i class="ace-icon fa fa-caret-down"></i>
                     </a>

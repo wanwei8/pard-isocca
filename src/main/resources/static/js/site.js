@@ -189,20 +189,34 @@ function bindZtree(treeName, url, loadedfunction, autoselect, pid, checkbox) {
 }
 function bindJstree(treeName, url, checkbox, loadedfunction) {
     var control = $('#' + treeName);
+    control.unbind('loaded.jstree').bind('loaded.jstree', loadedfunction);
     control.data('jstree', false); //清空数据， 必须
     var isCheck = arguments[2] || false;
     if (isCheck) {
         $.getJSON(url, function (data) {
             control.jstree({
                 'plugins': ['checkbox'],
-                'checkbox': {cascade: "", three_state: false},
+                'checkbox': {cascade: "down", three_state: true},
                 'core': {
                     'data': data,
                     'themes': {
-                        'responsive': false
+                        'responsive': false,
+                        'name': 'proton',
+                    },
+                    'strings': {
+                        'Loading ...': '数据正在加载中...'
                     }
                 }
-            }).bind('loaded.jstree', loadedfunction);
+            });
+            control.jstree(true).get_all_checked = function (full) {
+                var tmp = new Array;
+                for (var i in this._model.data) {
+                    if (this.is_undetermined(i) || this.is_checked(i)) {
+                        tmp.push(full ? this._model.data[i] : i);
+                    }
+                }
+                return tmp;
+            }
         });
     } else {
         $.getJSON(url, function (data) {
@@ -218,7 +232,7 @@ function bindJstree(treeName, url, checkbox, loadedfunction) {
                         'Loading ...': '数据正在加载中...'
                     }
                 }
-            }).bind('loaded.jstree', loadedfunction);
+            });
         });
     }
 }
@@ -370,6 +384,27 @@ function makeTableAddSmbtn(title) {
     html += '</a>';
     return html;
 }
+function makeTableAuthSmbtn() {
+    var html = '';
+    html += '<a href="javascript:;" class="btn btn-xs btn-warning" title="权限设置" id="authrow">';
+    html += '<i class="ace-icon glyphicons glyphicons-flowchart bigger-120"></i>';
+    html += '</a>';
+    return html;
+}
+function makeTableUserSmbtn() {
+    var html = '';
+    html += '<a href="javascript:;" class="btn btn-xs btn-primary" title="分配用户" id="userrow">';
+    html += '<i class="ace-icon glyphicons glyphicons-user bigger-120"></i>';
+    html += '</a>';
+    return html;
+}
+function makeTableAssignSmbtn() {
+    var html = '';
+    html += '<a href="javascript:;" class="btn btn-xs btn-primary" title="分配角色" id="rolerow">';
+    html += '<i class="ace-icon glyphicons glyphicons-group bigger-120"></i>';
+    html += '</a>';
+    return html;
+}
 function createToolbarAddBtn() {
     var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
     html += 'data-placement="left" onclick="add()" title="添加">';
@@ -489,3 +524,64 @@ var FastJson = {
         return a;
     }
 };
+function bindImageUpload(ctrName, maxFileCount, uri) {
+    var options = {
+        language: 'zh',
+        uploadUrl: uri,
+        deleteUrl: '/upfile/delete',
+        allowedFileExtensions: ['jpeg', 'jpg', 'png', 'gif', 'bmp'],
+        allowedFileTypes: ['image'],
+        showUpload: false,
+        showCaption: false,
+        showRemove: false,
+        maxFileCount: maxFileCount,
+        autoReplace: true,
+        initialPreviewShowDelete: true,
+        browseClass: "btn btn-primary",
+        previewFileIcon: "<i class='ace fa fa-file'></i>",
+        browseIcon: "<i class='ace fa fa-folder-open'></i>",
+        removeIcon: "<i class='ace fa fa-trash-o'></i>",
+        layoutTemplates: {
+            actionDelete: '',
+            actionUpload: ''
+        }
+    };
+    var control = $('#' + ctrName);
+    var imageUrl = control.attr("value");
+    if (!isEmpty(imageUrl)) {
+        var op = $.extend({
+            initialPreview: [
+                "<img src='" + imageUrl + "' class='file-preview-image kv-preview-data rotate-43106 is-landscape-gt4' style='width: auto;height: 160px;' alt='image' title='image'/>",
+            ]
+        }, options);
+        control.fileinput(op);
+    } else {
+        control.fileinput(options);
+    }
+    control.on("filebatchselected", function (event, files) {
+        control.fileinput("upload");
+    }).on("fileuploaded", function (event, data) {
+        var response = data.response;
+        if (response.success) {
+            control.attr("value", response.data[0]);
+        } else {
+            err(response.message);
+        }
+    }).on('fileremoved', function (event, id, index) {
+        console.log('id = ' + id + ', index = ' + index);
+        control.attr("value", "");
+    }).on('filedeleted', function (event, key, jqXHR, data) {
+        console.log('Key = ' + key);
+        control.attr("value", "");
+    });
+}
+
+function isEmpty(str) {
+    if (!str && typeof str != "undefined" && str != 0) {
+        return true;
+    }
+    if (str.replace(/(^s*)|(s*$)/g, "").length == 0) {
+        return true;
+    }
+    return false;
+}

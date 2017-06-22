@@ -1,6 +1,8 @@
 package com.pard.common.message;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -122,6 +125,13 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         List<PropertyPreFilter> filters = Lists.newArrayList();
         if (responseMessage.getIncludes() != null) {
             for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getIncludes().entrySet()) {
+                SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
+                filter.getIncludes().addAll(classSetEntry.getValue());
+                filters.add(filter);
+            }
+        }
+        if (responseMessage.getExcludes() != null) {
+            for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getExcludes().entrySet()) {
                 SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
                 filter.getExcludes().addAll(classSetEntry.getValue());
                 filters.add(filter);

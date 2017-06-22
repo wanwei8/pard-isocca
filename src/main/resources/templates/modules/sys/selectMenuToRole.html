@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>权限设置</title>
+    <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <form id="inputForm" th:object="${role}" method="post" cssClass="form-horizontal" modelAttribute="role">
+            <input type="hidden" id="id" name="id" th:value="*{id}">
+            <div id="menuTree" style="margin-top:3px;float:left;"></div>
+            <input id="menuIds" name="menuIds" type="hidden" th:value="${selectIds}"/>
+        </form>
+    </div>
+</div>
+
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/jstree/jstree.min.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    $(function () {
+        initTreeView();
+
+        validateForm = $("#inputForm").validate({
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/role/assignmenu'}]]*/ "/api/sys/role/assignmenu",
+                    type: "PUT",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.success) {
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                        return false;
+                    }
+                });
+            },
+        });
+    });
+    function initTreeView() {
+        var treeUrl = ctxApi + "/sys/menu/usermenutree";
+
+        bindJstree('menuTree', treeUrl, true, function () {
+            var tree = $("#menuTree").jstree();
+            // 默认选择节点
+            var ids = $("#menuIds").val().split(",");
+            for (var i = 0; i < ids.length; i++) {
+                var node = tree.get_node(ids[i]);
+                try {
+                    tree.check_node(node);
+                } catch (e) {
+                }
+            }
+        });
+    }
+
+    function doSubmit() {//回调函数，在编辑和保存动作时，供openDialog调用提交表单。
+        var ids = [], nodes = $("#menuTree").jstree("get_checked");
+        for (var i = 0; i < nodes.length; i++) {
+            ids.push(nodes[i]);
+        }
+        $("#menuIds").val(ids);
+        loading('正在提交，请稍等...');
+        $("#inputForm").submit();
+        return true;
+    }
+</script>
+</body>
+</html>

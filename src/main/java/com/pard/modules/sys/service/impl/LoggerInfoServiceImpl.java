@@ -18,15 +18,14 @@ public class LoggerInfoServiceImpl extends SimpleServiceImpl<LoggerInfo, LoggerI
         super.save(model);
     }
 
-    @Override
-    protected String getCacheName() {
-        return "loggerInfoes";
-    }
-
     @Autowired
     @Override
     protected void setRepository(LoggerInfoRepository repository) {
         this.repository = repository;
     }
 
+    @Override
+    public LoggerInfo findOne(String id) {
+        return getRepository().findOne(id);
+    }
 }

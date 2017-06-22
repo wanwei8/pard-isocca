@@ -34,12 +34,12 @@
                                 <a data-toggle="tab" href="#role">按角色查看</a>
                             </li>
                         </ul>
-                        <div class="tab-content no-padding">
+                        <div class="tab-content no-padding-left no-padding-right">
                             <div id="office" class="tab-pane in active">
-                                <div id="treeOffice" class="ztree scrollable"></div>
+                                <div id="treeOffice" class="scrollable"></div>
                             </div>
                             <div id="role" class="tab-pane">
-
+                                <div id="treeRole" class="scrollable"></div>
                             </div>
                         </div>
                     </div>
@@ -84,11 +84,10 @@
         null];
     $('.page-content-area').ace_ajax('loadScripts', scripts, function () {
         $(function () {
-
             initPageScript();
             initTreeView();
             initDataTableView();
-
+            $('#reset').on('click', reset);
         });
 
     });
@@ -107,6 +106,21 @@
                     'data': 'id',
                     'visible': false,
                     'title': 'ID',
+                    'orderable': false,
+                }, {
+                    'data': 'companyId',
+                    'visible': false,
+                    'title': 'companyId',
+                    'orderable': false,
+                }, {
+                    'data': 'officeId',
+                    'visible': false,
+                    'title': 'officeId',
+                    'orderable': false,
+                }, {
+                    'data': 'role',
+                    'visible': false,
+                    'title': 'role',
                     'orderable': false,
                 }, {
                     'data': 'no',
@@ -131,11 +145,11 @@
                         return '<span class="label label-danger arrowed">禁用</span>';
                     }
                 }, {
-                    'data': 'company.name',
+                    'data': 'companyName',
                     'title': '归属单位',
                     'orderable': false,
                 }, {
-                    'data': 'office.name',
+                    'data': 'officeName',
                     'title': '归属部门',
                     'orderable': false,
                 }, {
@@ -144,9 +158,10 @@
                     'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
                     makeTableEditSmbtn() +
                     makeTableDelSmbtn() +
+                    makeTableAssignSmbtn() +
                     '</div>',
                     'orderable': false,
-                    'width': '100px'
+                    'width': '140px'
                 },
             ],
             'initComplete': function () {
@@ -161,13 +176,36 @@
         $('#tbl tbody').on('click', 'a#viewrow', view);
         $('#tbl tbody').on('click', 'a#editrow', edit);
         $('#tbl tbody').on('click', 'a#delrow', del);
+        $('#tbl tbody').on('click', 'a#rolerow', assign);
     }
 </script>
 <script type="text/javascript">
     <![CDATA[
-    function initTreeView(pid) {
+    function initTreeView() {
+        initOfficeTree();
+        initRoleTree();
+    }
+    function initOfficeTree() {
         var treeUrl = ctxApi + "/sys/office/tree";
-        bindJstree('treeOffice', treeUrl);
+        bindJstree('treeOffice', treeUrl, false);
+        $('#treeOffice').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables(data.selected);
+        });
+    }
+    function initRoleTree() {
+        var treeUrl = ctxApi + "/sys/role/tree";
+        bindJstree('treeRole', treeUrl, false);
+        $('#treeRole').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables('', data.selected);
+        });
+    }
+    function refDataTables(oid, rid) {
+        oid = oid || '';
+        rid = rid || '';
+        var tab = $('#tbl').DataTable();
+        tab.columns(1).search(oid).columns(2).search(oid).columns(3).search(rid).draw();
     }
     function add() {
         var treeObj = $('#treeOffice').jstree();
@@ -212,8 +250,46 @@
             });
         });
     }
+    function assign() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxAdmin + '/sys/user/assign?id=' + data.id;
+        openDialogView('分配角色', url, '800px', '600px')
+    }
     function refresh() {
         $('#tbl').DataTable().ajax.reload();
+    }
+    function reset() {
+        $('#name').val("");
+        $('#loginName').val("");
+        $('#no').val("");
+        search();
+    }
+    function search() {
+        var name = $('#name').val() || "";
+        var no = $('#no').val() || "";
+        var loginName = $('#loginName').val() || "";
+
+        var tab = $('#tbl').DataTable();
+
+        tab.columns().every(function (p1, p2, p3) {
+            var column = this
+            column.search('');
+        });
+
+        if (isEmpty(name) && isEmpty(no) && isEmpty(loginName)) {
+            initTreeView();
+        } else {
+            if (!isEmpty(name)) {
+                tab.columns(5).search(name);
+            }
+            if (!isEmpty(loginName)) {
+                tab.column(4).search(loginName);
+            }
+            if (!isEmpty(no)) {
+                tab.column(3).search(no);
+            }
+            tab.draw();
+        }
     }
     ]]>
 </script>

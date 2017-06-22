@@ -1,12 +1,12 @@
 package com.pard.modules.sys.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.google.common.collect.Lists;
 import com.pard.common.persistence.TreeEntity;
 import com.pard.common.utils.StringUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by wawe on 17/5/15.
@@ -29,6 +29,12 @@ public class Menu extends TreeEntity<Menu> {
     private String icon;
 
     /**
+     * 目标（ mainFrame、_blank、_self、_parent、_top）
+     */
+    @Column(length = 50)
+    private String target;
+
+    /**
      * 是否在菜单中显示
      */
     @Column(length = 1, nullable = false)
@@ -40,15 +46,15 @@ public class Menu extends TreeEntity<Menu> {
     @Column(length = 200)
     private String permission;
 
-    @Override
-    public Menu getParent() {
-        return parent;
-    }
+    /**
+     * 请求方法 GET PUT POST DELETE
+     */
+    @Column(length = 50)
+    private String method;
 
-    @Override
-    public void setParent(Menu parent) {
-        this.parent = parent;
-    }
+    @JSONField(serialize = false)
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "menuList")
+    private List<Role> roleList = Lists.newArrayList();
 
     public Menu() {
         super();
@@ -69,10 +75,17 @@ public class Menu extends TreeEntity<Menu> {
     }
 
     public Menu(String id, String pid, String name, String href, String icon, Integer sort, String parentIds) {
+        this(id, pid, name, href, icon, sort, parentIds, SHOW, "");
+    }
+
+    public Menu(String id, String pid, String name, String href, String icon, Integer sort, String parentIds,
+                String isShow, String permission) {
         this(id, pid, name, parentIds);
         this.href = href;
         this.icon = icon;
         this.sort = sort;
+        this.isShow = isShow;
+        this.permission = permission;
     }
 
     public Menu(String id, String pid, String name, String href, String isShow, int sort, String permission, String icon) {
@@ -86,6 +99,16 @@ public class Menu extends TreeEntity<Menu> {
         this.sort = sort;
         this.permission = permission;
         this.icon = icon;
+    }
+
+    @Override
+    public Menu getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(Menu parent) {
+        this.parent = parent;
     }
 
     public String getHref() {
@@ -118,5 +141,29 @@ public class Menu extends TreeEntity<Menu> {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    public List<Role> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<Role> roleList) {
+        this.roleList = roleList;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
 }

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
+    <title>系统角色管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/components/select2/css/select2-bootstrap.css}"/>
+</head>
+<body class="page-content">
+<div class="row">
+    <div class="col-xs-12">
+        <form th:object="${role}" method="post" id="roleForm" class="form-horizontal" role="form">
+            <input type="hidden" name="id" th:value="*{id}"/>
+            <input type="hidden" name="officeIds" value="">
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="company">
+                    所属公司<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select id="company" name="company.id" th:value="*{company.id}"
+                            class="form-control required select2-single"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="office">
+                    所属部门<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select id="office" name="office.id" th:value="*{office.id}"
+                            class="form-control required select2-single"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">角色名称<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control required" maxlength="50" id="name"
+                           name="name" placeholder="角色名称" th:value="*{name}"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">是否可用</label>
+                <div class="col-sm-6">
+                    <div class="radio">
+                        <label>
+                            <input th:field="*{useable}" id="useableEnable" name="useable" type="radio"
+                                   class="ace" value="1">
+                            <span class="lbl">可用</span>
+                        </label>
+                        <label>
+                            <input th:field="*{useable}" id="useableDisenable" name="useable" type="radio"
+                                   class="ace" value="0">
+                            <span class="lbl">禁用</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">数据范围<span class="red">*</span></label>
+                <div class="col-sm-6">
+                    <select id="dataScope" name="dataScope" class="form-control select2 valid"
+                            th:value="*{dataScope}">
+                    </select>
+                    <span class="help-inline">特殊情况下，设置为"按明细设置"，可进行跨机构授权</span>
+                    <div class="controls">
+                        <div id="officeTree" style="margin-top: 3px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">备注</label>
+                <div class="col-sm-6">
+                        <textarea class="form-control" maxlength="255" rows="3"
+                                  id="remarks" name="remarks" placeholder="备注"
+                                  th:text="*{remarks}">
+                        </textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block th:replace="include/dialog_template :: javascript"/>
+<script th:src="@{/components/select2/js/select2.full.js}"></script>
+<script th:src="@{/components/select2/js/select2tree.js}"></script>
+<script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
+<script th:inline="javascript">
+    var validateForm;
+    var refershGrid;
+    function doSubmit(callback) {
+        if (validateForm.form()) {
+            refershGrid = callback;
+            $("#roleForm").submit();
+        }
+        return false;
+    }
+    $(function () {
+        select2Company([[${role.company.id}]], [[${role.office.id}]]);
+        buildSelect("dataScope", "sys_data_scope", [[${role.dataScope}]]);
+        validateForm = $("#roleForm").validate({
+            rules: {
+                name: {remote: ctxApi + "/sys/role/checkName?oldName=" + encodeURIComponent([[${role.name}]])}
+            },
+            messages: {
+                name: {remote: "角色名已存在"}
+            },
+            submitHandler: function (form) {
+                loading();
+                $.ajax({
+                    url: /*[[@{${@global.getApiPath()}+'/sys/role/'}]]*/ "/api/sys/role/",
+                    type: "POST",
+                    data: $(form).serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.success) {
+                            if (typeof refershGrid === "function") {
+                                refershGrid();
+                            }
+                            closeAll();
+                            msg(data.message);
+                        } else {
+                            err(data.message);
+                        }
+                    },
+                    error: function (request, textStatus, errorThrow) {
+                        closeLoading();
+                        err("提交服务器失败");
+                    }
+                })
+            },
+        });
+        $('#roleForm').validate().element($('#name'));
+    });
+</script>
+<script type="text/javascript">
+    function select2Company(pid, oid) {
+        var url = ctxApi + "/sys/office/select2company";
+        bindSelect('company', url, pid);
+        $('#company').on('change', function (e) {
+            var cid = $('#company').val();
+            select2Office(cid, oid);
+        });
+    }
+    function select2Office(cid, oid) {
+        cid = cid || '';
+        oid = oid || '';
+        var url = ctxApi + "/sys/office/select2office?company=" + cid;
+        bindSelect2Tree('office', url, oid);
+    }
+    function buildSelect(control, type, val) {
+        var url = ctxApi + "/sys/dict/dict?type=" + type;
+        bindSelect(control, url, val);
+    }
+</script>
+</body>
+</html>

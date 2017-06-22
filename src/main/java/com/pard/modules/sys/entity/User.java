@@ -1,10 +1,13 @@
 package com.pard.modules.sys.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.google.common.collect.Lists;
 import com.pard.common.persistence.DataEntity;
+import com.pard.common.utils.StringUtils;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by wawe on 17/6/4.
@@ -17,6 +20,7 @@ public class User extends DataEntity<User> {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
+    @JSONField(serialize = false)
     private Office company;
 
     /**
@@ -24,6 +28,7 @@ public class User extends DataEntity<User> {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
+    @JSONField(serialize = false)
     private Office office;
 
     /**
@@ -55,28 +60,24 @@ public class User extends DataEntity<User> {
      * 邮箱
      */
     @Column(length = 200)
-    @JSONField(serialize = false)
     private String email;
 
     /**
      * 电话
      */
     @Column(length = 200)
-    @JSONField(serialize = false)
     private String phone;
 
     /**
      * 手机
      */
     @Column(length = 200)
-    @JSONField(serialize = false)
     private String mobile;
 
     /**
      * 传真
      */
     @Column(length = 200)
-    @JSONField(serialize = false)
     private String fax;
 
     /**
@@ -90,7 +91,6 @@ public class User extends DataEntity<User> {
      * 用户头像
      */
     @Column(length = 1000)
-    @JSONField(serialize = false)
     private String photo;
 
     /**
@@ -139,6 +139,20 @@ public class User extends DataEntity<User> {
     @JSONField(serialize = false)
     private String oldName;
 
+    /**
+     * 原照片
+     */
+    @Transient
+    @JSONField(serialize = false)
+    private String oldPhoto;
+
+    /**
+     * 用户所属角色，一个用户可以有多个角色
+     */
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "userList")
+    @JSONField(serialize = false)
+    private List<Role> roleList = Lists.newArrayList();
+
     public User() {
         super();
         loginFlag = "0";
@@ -150,6 +164,26 @@ public class User extends DataEntity<User> {
     public User(String id) {
         this();
         this.id = id;
+    }
+
+    public User(String id, String name) {
+        this(id);
+        this.name = name;
+    }
+
+    public User(String id, String no, String loginName, String name, String loginFlag, String companyId, String companyName,
+                String officeId, String officeName) {
+        this(id);
+        this.no = no;
+        this.loginName = loginName;
+        this.name = name;
+        this.loginFlag = loginFlag;
+        if (StringUtils.isNotBlank(companyId)) {
+            this.company = new Office(companyId, companyName);
+        }
+        if (StringUtils.isNotBlank(officeId)) {
+            this.office = new Office(officeId, officeName);
+        }
     }
 
     public User(User user) {
@@ -177,6 +211,10 @@ public class User extends DataEntity<User> {
         this.updateDate = user.getUpdateDate();
         this.duties = user.getDuties();
         this.gender = user.getGender();
+    }
+
+    public static boolean isAdmin(String id) {
+        return StringUtils.repeat("0", 32).equals(id);
     }
 
     public Office getCompany() {
@@ -331,6 +369,14 @@ public class User extends DataEntity<User> {
         this.gender = gender;
     }
 
+    public List<Role> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<Role> roleList) {
+        this.roleList = roleList;
+    }
+
     public String getCompanyId() {
         if (company != null) {
             return company.getId();
@@ -343,5 +389,25 @@ public class User extends DataEntity<User> {
             return office.getId();
         }
         return "";
+    }
+
+    public String getCompanyName() {
+        return company != null ? company.getName() : "";
+    }
+
+    public String getOfficeName() {
+        return office != null ? office.getName() : "";
+    }
+
+    public String getOldPhoto() {
+        return oldPhoto;
+    }
+
+    public void setOldPhoto(String oldPhoto) {
+        this.oldPhoto = oldPhoto;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin(this.id);
     }
 }

@@ -11,6 +11,6 @@ import java.util.List;
  */
 public interface OfficeRepostiroy extends DataTablesRepository<Office, String> {
 
-    @Query(value = "select new Office(id, parent.id, name, code, type, sort, useable, remarks) from Office a where a.delFlag = 0 order by a.parentIds, a.sort")
+    @Query(value = "select a from Office a where a.delFlag = 0 order by a.parentIds, a.sort")
     List<Office> findAllWithTree();
 }

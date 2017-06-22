@@ -66,16 +66,12 @@
                     'visible': false,
                     'title': 'ID'
                 }, {
-                    'data': 'parent.id',
+                    'data': 'parentId',
                     'visible': false,
                     'title': 'PID'
                 }, {
                     'data': 'name',
                     'title': '显示名称',
-                    'orderable': false,
-                }, {
-                    'data': 'href',
-                    'title': 'Web连接地址',
                     'orderable': false,
                 }, {
                     'data': 'isShow',
@@ -95,6 +91,10 @@
                     'render': function (data, type, row) {
                         return '<input type="text" name="ids" class="hide" value="' + row.id + '"/><input type="number" name="sorts" value="' + data + '" class="input-sm input-mini text-center" />';
                     }
+                }, {
+                    'data': 'target',
+                    'title': '目标',
+                    'orderable': false,
                 }, {
                     'data': 'permission',
                     'title': '权限标识',
@@ -142,8 +142,9 @@
             var obj = treeObj.get_node(pid);
             treeObj.select_node(obj, false, false);
         });
-        $('#tree').on('changed.jstree', function (e, data) {
-            refDataTables(data.selected);
+        $('#tree').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables(data.selected);
         });
     }
     function refDataTables(pid) {
@@ -155,9 +156,11 @@
     }
     function refreshCurrTreeNode() {
         var treeObj = $('#tree').jstree();
-        var nodes = treeObj.get_selected();
-        if (nodes.length > 0) {
-            initAreaTreeView(treeObj.get_node(nodes[0]).id);
+        var nodeIds = treeObj.get_selected(true);
+        if (nodeIds.length > 0) {
+            initTreeView(nodeIds[0].id);
+        } else {
+            initTreeView();
         }
     }
 
@@ -169,7 +172,7 @@
             var node = treeObj.get_node(nodes[0]);
             url += "?parent.id=" + node.id + "&parent.name=" + node.name;
         }
-        openDialog("新增菜单", url, "800px", "500px", initTreeView);
+        openDialog("新增菜单", url, "800px", "500px", refreshCurrTreeNode);
     }
     function del() {
         var data = $('#tbl').DataTable().row($(this).parents('tr')).data();

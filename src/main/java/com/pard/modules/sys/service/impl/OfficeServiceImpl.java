@@ -27,23 +27,18 @@ import java.util.List;
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Component("officeService")
 public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy> implements OfficeService {
+
     @Autowired
     @Override
     protected void setRepository(OfficeRepostiroy repository) {
         this.repository = repository;
     }
 
-    @Override
-    protected String getCacheName() {
-        return "offices";
-    }
-
     @Cacheable
     @Override
     public List<Office> findByParentId(String pid) {
         StringBuilder sbHql = new StringBuilder();
-        sbHql.append("select new Office(id, parent.id, name, code, type, sort, useable, remarks)")
-                .append(" from Office o")
+        sbHql.append("select o from Office o")
                 .append(" where o.delFlag = :delFlag")
                 .append(" and o.parent ")
                 .append((StringUtils.isBlank(pid) || "0".equals(pid)) ? " is null" : " = :parent")
@@ -74,21 +69,18 @@ public class OfficeServiceImpl extends TreeServiceImpl<Office, OfficeRepostiroy>
             query.setParameter("id", office.getId());
             query.executeUpdate();
         }
-        clearCache();
     }
 
     @Cacheable
     @Override
     public List<Office> findCompanyWithTree() {
         StringBuilder sbHql = new StringBuilder();
-        sbHql.append("select new Office(id,parent.id,name)")
-                .append(" ")
-                .append("from Office o")
-                .append(" ")
-                .append("where o.delFlag = '0' and o.type = '1'")
-                .append(" ")
-                .append("order by o.parentIds, o.sort");
+        sbHql.append("select o from Office o")
+                .append(" where o.delFlag = :delFlag and o.type = :type")
+                .append(" order by o.parentIds, o.sort");
         Query query = entityManager.createQuery(sbHql.toString());
+        query.setParameter("delFlag", Office.DEL_FLAG_NORMAL);
+        query.setParameter("type", "1");
         return query.getResultList();
     }
 

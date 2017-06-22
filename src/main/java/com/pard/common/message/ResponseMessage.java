@@ -18,34 +18,37 @@ import java.util.Set;
  */
 public class ResponseMessage implements Serializable {
 
+    /**
+     * 是否成功
+     */
     private boolean success;
-
+    /**
+     * 反馈数据
+     */
     private Object data;
-
+    /**
+     * 反馈信息
+     */
     private String message;
 
+    /**
+     * 响应码
+     */
     private int code;
 
+    /**
+     * 过滤字段：指定需要序列化的字段
+     */
     private transient Map<Class<?>, Set<String>> includes;
 
+    /**
+     * 过滤字段：指定不需要序列化的字段
+     */
     private transient Map<Class<?>, Set<String>> excludes;
 
     private transient boolean onlyData;
 
     private transient String callback;
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("success", this.success);
-        if (data != null) {
-            map.put("data", this.getData());
-        }
-        if (message != null) {
-            map.put("message", this.getMessage());
-        }
-        map.put("code", this.getCode());
-        return map;
-    }
 
     protected ResponseMessage(String message) {
         this.code = 500;
@@ -64,6 +67,47 @@ public class ResponseMessage implements Serializable {
         this.code = code;
     }
 
+    public static ResponseMessage fromJson(String json) {
+        return JSON.parseObject(json, ResponseMessage.class);
+    }
+
+    public static ResponseMessage ok() {
+        return ok(null);
+    }
+
+    public static ResponseMessage ok(String message) {
+        return new ResponseMessage(message).setSuccess(true).setCode(200);
+    }
+
+    public static ResponseMessage ok(Object data) {
+        return new ResponseMessage(true, data);
+    }
+
+    public static ResponseMessage created(Object data) {
+        return new ResponseMessage(true, data, 201);
+    }
+
+    public static ResponseMessage error(String message) {
+        return new ResponseMessage(message);
+    }
+
+    public static ResponseMessage error(String message, int code) {
+        return new ResponseMessage(message).setCode(code);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("success", this.success);
+        if (data != null) {
+            map.put("data", this.getData());
+        }
+        if (message != null) {
+            map.put("message", this.getMessage());
+        }
+        map.put("code", this.getCode());
+        return map;
+    }
+
     public ResponseMessage include(Class<?> type, String... fields) {
         return include(type, Lists.newArrayList(fields));
     }
@@ -74,7 +118,7 @@ public class ResponseMessage implements Serializable {
         }
         if (fields == null || fields.isEmpty()) return this;
         fields.forEach(field -> {
-            if (fields.contains(".")) {
+            if (field.contains(".")) {
                 String tmp[] = field.split("[.]", 2);
                 try {
                     Field field1 = type.getDeclaredField(tmp[0]);
@@ -85,6 +129,7 @@ public class ResponseMessage implements Serializable {
                 }
             } else {
                 getStringListFormMap(includes, type).add(field);
+
             }
         });
         return this;
@@ -130,7 +175,7 @@ public class ResponseMessage implements Serializable {
             includes = Maps.newHashMap();
         }
         if (fields == null || fields.isEmpty()) return this;
-        Class type;
+        Class<?> type;
         if (data != null) type = data.getClass();
         else return this;
         include(type, fields);
@@ -162,8 +207,9 @@ public class ResponseMessage implements Serializable {
         return success;
     }
 
-    public void setSuccess(boolean success) {
+    public ResponseMessage setSuccess(boolean success) {
         this.success = success;
+        return this;
     }
 
     public Object getData() {
@@ -189,10 +235,6 @@ public class ResponseMessage implements Serializable {
         return JSON.toJSONStringWithDateFormat(this, DateTimeUtils.YEAR_MONTH_DAY_HOUR_MINUTE_SECOND);
     }
 
-    public static ResponseMessage fromJson(String json) {
-        return JSON.parseObject(json, ResponseMessage.class);
-    }
-
     public Map<Class<?>, Set<String>> getExcludes() {
         return excludes;
     }
@@ -206,12 +248,12 @@ public class ResponseMessage implements Serializable {
         return this;
     }
 
-    public void setOnlyData(boolean onlyData) {
-        this.onlyData = onlyData;
-    }
-
     public boolean isOnlyData() {
         return onlyData;
+    }
+
+    public void setOnlyData(boolean onlyData) {
+        this.onlyData = onlyData;
     }
 
     public ResponseMessage callback(String callback) {
@@ -229,31 +271,5 @@ public class ResponseMessage implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public static ResponseMessage ok() {
-        return ok(null);
-    }
-
-    public static ResponseMessage ok(String message) {
-        ResponseMessage rm = new ResponseMessage(message);
-        rm.setSuccess(true);
-        return rm;
-    }
-
-    public static ResponseMessage ok(Object data) {
-        return new ResponseMessage(true, data);
-    }
-
-    public static ResponseMessage created(Object data) {
-        return new ResponseMessage(true, data, 201);
-    }
-
-    public static ResponseMessage error(String message) {
-        return new ResponseMessage(message);
-    }
-
-    public static ResponseMessage error(String message, int code) {
-        return new ResponseMessage(message).setCode(code);
     }
 }

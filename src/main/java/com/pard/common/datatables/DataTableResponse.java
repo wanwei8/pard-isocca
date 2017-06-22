@@ -12,9 +12,9 @@ public class DataTableResponse<T> implements Serializable {
 
     private int draw;
 
-    private long recordsTotal;
+    private long recordsTotal = 0;
 
-    private long recordsFiltered;
+    private long recordsFiltered = 0;
 
     private List<T> data;
 

@@ -58,7 +58,7 @@
                     'visible': false,
                     'title': 'ID'
                 }, {
-                    'data': 'parent.id',
+                    'data': 'parentId',
                     'visible': false,
                     'title': 'PID'
                 }, {
@@ -113,14 +113,15 @@
     function initAreaTreeView(pid) {
         pid = pid || '0';
         var treeUrl = ctxApi + "/sys/area/tree?isall=1";
+        $('#tree').off('changed.jstree').on('changed.jstree', function (e, data) {
+            if (data.action == "select_node")
+                refDataTables(data.selected);
+        });
         bindJstree('tree', treeUrl, false, function (e, data) {
             var treeObj = data.instance;
             treeObj.deselect_all();
             var obj = treeObj.get_node(pid);
             treeObj.select_node(obj, false, false);
-        });
-        $('#tree').on('changed.jstree', function (e, data) {
-            refDataTables(data.selected);
         });
     }
     function refDataTables(pid) {
@@ -135,6 +136,8 @@
         var nodes = treeObj.get_selected();
         if (nodes.length > 0) {
             initAreaTreeView(treeObj.get_node(nodes[0]).id);
+        } else {
+            initAreaTreeView();
         }
     }
 

@@ -16,7 +16,7 @@ import java.util.List;
 @CacheConfig(cacheNames = "areas")
 public interface AreaRepository extends DataTablesRepository<Area, String> {
     @Cacheable
-    @Query(value = "select new Area(id,parent.id,name, parentIds) from Area a where a.delFlag = 0 order by a.parentIds, a.sort")
+    @Query(value = "from Area a where a.delFlag = 0 order by a.parentIds, a.sort")
     List<Area> findAllWithTree();
 
     @Cacheable

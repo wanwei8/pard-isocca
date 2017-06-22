@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * 统一错误处理
  * Created by wawe on 17/6/1.
  */
 @ControllerAdvice(annotations = Controller.class)

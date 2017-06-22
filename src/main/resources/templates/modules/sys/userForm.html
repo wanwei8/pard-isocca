@@ -29,18 +29,17 @@
         <div class="tab-content">
             <div id="homeTab" class="tab-pane in active">
                 <form id="inputForm" class="form-horizontal" role="form" th:object="${user}">
-                    <input type="hidden" name="id" th:value="*{id}"/>
+                    <input type="hidden" th:field="*{id}"/>
                     <input type="hidden" name="oldName" th:value="*{loginName}"/>
-                    <input type="hidden" id="photo" name="photo" th:value="*{photo}"/>
+                    <input type="hidden" th:field="*{photo}"/>
                     <div class="row">
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="loginName">用户名/登录名<span
                                         class="red">*</span></label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="loginName" name="loginName" th:value="*{loginName}"
-                                           placeholder="用户名/登录名" maxlength="50"
-                                           class="form-control required"/>
+                                    <input type="text" id="loginName" th:field="*{loginName}" placeholder="用户名/登录名"
+                                           maxlength="50" class="form-control required"/>
                                 </div>
                             </div>
                         </div>
@@ -48,8 +47,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="name">真实姓名<span class="red">*</span></label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="name" name="name" th:value="*{name}" placeholder="真实姓名"
-                                           maxlength="50"
+                                    <input type="text" id="name" th:field="*{name}" placeholder="真实姓名" maxlength="50"
                                            class="form-control required"/>
                                 </div>
                             </div>
@@ -68,7 +66,7 @@
                         </div>
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
-                                <label class="col-sm-4 control-label no-padding-right" for="company">所属部门<span
+                                <label class="col-sm-4 control-label no-padding-right" for="office">所属部门<span
                                         class="red">*</span></label>
                                 <div class="col-sm-8">
                                     <select id="office" name="office.id" th:value="*{office.id}"
@@ -83,18 +81,16 @@
                                 <label class="col-sm-4 control-label no-padding-right" for="no">用户编码<span
                                         class="red">*</span></label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="no" name="no" th:value="*{no}" placeholder="用户编码"
-                                           maxlength="50"
+                                    <input type="text" id="no" th:field="*{no}" placeholder="用户编码" maxlength="50"
                                            class="form-control required"/>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
-                                <label class="col-sm-4 control-label no-padding-right" for="company">职务头衔</label>
+                                <label class="col-sm-4 control-label no-padding-right" for="duties">职务头衔</label>
                                 <div class="col-sm-8">
-                                    <select id="duties" name="duties" th:value="*{duties}"
-                                            class="form-control select2"></select>
+                                    <select id="duties" th:field="*{duties}" class="form-control select2"></select>
                                 </div>
                             </div>
                         </div>
@@ -115,8 +111,8 @@
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right"
-                                       for="confireNewPassword">确认密码<span class="red"
-                                                                          th:if="${#strings.isEmpty(user.id)}">*</span></label>
+                                       for="confireNewPassword">
+                                    确认密码<span class="red" th:if="${#strings.isEmpty(user.id)}">*</span></label>
                                 <div class="col-sm-8">
                                     <input type="password" id="confireNewPassword" name="confireNewPassword" value=""
                                            placeholder="确认密码"
@@ -130,8 +126,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="phone">办公电话</label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="phone" name="phone" th:value="*{phone}" placeholder="办公电话"
-                                           maxlength="100"
+                                    <input type="text" id="phone" th:field="*{phone}" placeholder="办公电话" maxlength="100"
                                            class="form-control"/>
                                 </div>
                             </div>
@@ -140,9 +135,8 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="mobile">移动电话</label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="mobile" name="mobile" th:value="*{mobile}" placeholder="移动电话"
-                                           maxlength="100"
-                                           class="form-control"/>
+                                    <input type="text" id="mobile" th:field="*{mobile}" placeholder="移动电话"
+                                           maxlength="100" class="form-control"/>
                                 </div>
                             </div>
                         </div>
@@ -152,8 +146,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="email">邮件地址</label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="email" name="email" th:value="*{email}" placeholder="邮件地址"
-                                           maxlength="100"
+                                    <input type="text" id="email" th:field="*{email}" placeholder="邮件地址" maxlength="100"
                                            class="form-control"/>
                                 </div>
                             </div>
@@ -162,8 +155,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label no-padding-right" for="fax">传真</label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="fax" name="fax" th:value="*{fax}" placeholder="传真"
-                                           maxlength="100"
+                                    <input type="text" id="fax" th:field="*{fax}" placeholder="传真" maxlength="100"
                                            class="form-control"/>
                                 </div>
                             </div>
@@ -172,12 +164,11 @@
                     <div class="row">
                         <div class="col-sm-6 col-xs-12">
                             <div class="form-group">
-                                <label class="col-sm-4 control-label no-padding-right" for="loginFlag">是否允许登录<span
+                                <label class="col-sm-4 control-label no-padding-right" for="loginFlag">是否禁用<span
                                         class="red">*</span></label>
                                 <div class="col-sm-8">
-                                    <input type="text" id="loginFlag" name="loginFlag" th:value="*{loginFlag}"
-                                           placeholder="是否允许登录" maxlength="50"
-                                           class="form-control required"/>
+                                    <input type="text" id="loginFlag" th:field="*{loginFlag}" placeholder="是否禁用"
+                                           maxlength="50" class="form-control"/>
                                 </div>
                             </div>
                         </div>
@@ -206,8 +197,8 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label no-padding-right" for="remarks">备注</label>
                                 <div class="col-sm-10">
-                                    <textarea id="remarks" name="remarks" th:value="*{remarks}" placeholder="备注"
-                                              rows="3" class="form-control">
+                                    <textarea id="remarks" th:field="*{remarks}" placeholder="备注" rows="3"
+                                              class="form-control">
                                     </textarea>
                                 </div>
                             </div>
@@ -224,11 +215,7 @@
             <div id="photoTab" class="tab-pane">
                 <div class="row">
                     <div class="col-xs-12">
-                        <form class="dropzone well">
-                            <div class="fallback">
-                                <input name="file" id="photoFile" type="file"/>
-                            </div>
-                        </form>
+                        <input name="file" id="photoFile" type="file" th:value="${user.photo}"/>
                     </div>
                 </div>
             </div>
@@ -239,7 +226,7 @@
 <script th:src="@{/components/select2/js/select2.full.js}"></script>
 <script th:src="@{/components/select2/js/select2tree.js}"></script>
 <script th:src="@{/components/select2/js/i18n/zh-CN.js}"></script>
-<script th:src="@{/components/treeSelect/jquery.treeSelect.js}"></script>
+<!--<script th:src="@{/components/treeSelect/jquery.treeSelect.js}"></script>-->
 <script th:src="@{/components/bootstrap-fileinput/fileinput.min.js}"></script>
 <script th:src="@{/components/bootstrap-fileinput/locales/zh.js}"></script>
 <script th:inline="javascript">
@@ -257,10 +244,11 @@
         select2Company([[${user.company.id}]], [[${user.office.id}]]);
         buildSelect('duties', 'sys_duties', [[${user.duties}]]);
         buildSelect('loginFlag', 'yes_no', [[${user.loginFlag}]]);
-        bindFileInput();
+        bindImageUpload('photoFile', 1, '/upfile/image/');
         validateForm = $("#inputForm").validate({
             submitHandler: function (form) {
                 loading();
+                $('#photo').attr("value", $('#photoFile').attr("value"));
                 $.ajax({
                     url: /*[[@{${@global.getApiPath()}+'/sys/user/'}]]*/ "/api/sys/user/",
                     type: "POST",
@@ -307,36 +295,6 @@
     function buildSelect(control, type, val) {
         var url = ctxApi + "/sys/dict/dict?type=" + type;
         bindSelect(control, url, val);
-    }
-    function bindFileInput() {
-        /* $('#photo').ace_file_input({
-         style:'well',
-         btn_choose: '请选择图片...',
-         btn_change: null,
-         no_icon:'ace-icon fa fa-cloud-upload',
-         dropable:false,
-         thumbnail:'large',
-         allowExt:['jpeg','jpg','png','gif','bmp'],
-         allowMime:['image/jpg','image/jpeg','image/png','image/gif','image/bmp'],
-         }).on('file.error.ace',function(event, info){
-         if(info.error_list.ext.length > 0){
-         err('请上传图片格式文件');
-         }else if(info.error_list.mime.length > 0){
-         err('请上传有效的图片格式文件');
-         }
-         });*/
-
-        $("#photoFile").fileinput({
-            language: 'zh',
-            uploadUrl: '/upfile/image/',
-            allowedFileExtensions: ['jpeg', 'jpg', 'png', 'gif', 'bmp'],
-            showUpload: true,
-            showCaption: false,
-            maxFileCount: 1,
-            autoReplace: true,
-            browseClass: "btn btn-primary",
-            previewFileIcon: "<i class='glyphicon glyphicon-kind'></i>",
-        });
     }
 </script>
 </body>

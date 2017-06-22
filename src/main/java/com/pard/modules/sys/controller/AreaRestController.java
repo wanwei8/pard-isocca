@@ -39,27 +39,30 @@ public class AreaRestController extends GenericController implements MessageCons
     @AccessLogger("获取地区列表")
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ResponseMessage getAreaList(@Valid DataTableRequest input) {
-        Column column = input.getColumn("parent.id");
-        List<Area> areas = areaService.findByParentId(column.getSearch().getValue());
-        Set<Dict> dicts = Sets.newHashSet(dictService.findByType("sys_area_type"));
-        for (Area a : areas) {
-            Set<Dict> filter = Sets.filter(dicts, new com.google.common.base.Predicate<Dict>() {
-                @Override
-                public boolean apply(Dict dict) {
-                    return dict.getValue().equals(a.getType());
-                }
-            });
-            if (!filter.isEmpty()) {
-                Dict dict = filter.iterator().next();
-                a.setTypeLabel(dict.getLabel());
-            }
-        }
+        Column column = input.getColumn("parentId");
         DataTableResponse<Area> r = new DataTableResponse<>();
         r.setDraw(input.getDraw());
-        r.setData(areas);
-        r.setRecordsTotal(areas.size());
-        r.setRecordsFiltered(areas.size());
-        return ResponseMessage.ok(r).onlyData();
+        if (StringUtils.isNotBlank(column.getSearch().getValue())) {
+            List<Area> areas = areaService.findByParentId(column.getSearch().getValue());
+            Set<Dict> dicts = Sets.newHashSet(dictService.findByType("sys_area_type"));
+            for (Area a : areas) {
+                Set<Dict> filter = Sets.filter(dicts, new com.google.common.base.Predicate<Dict>() {
+                    @Override
+                    public boolean apply(Dict dict) {
+                        return dict.getValue().equals(a.getType());
+                    }
+                });
+                if (!filter.isEmpty()) {
+                    Dict dict = filter.iterator().next();
+                    a.setTypeLabel(dict.getLabel());
+                }
+            }
+            r.setData(areas);
+            r.setRecordsTotal(areas.size());
+            r.setRecordsFiltered(areas.size());
+        }
+        return ResponseMessage.ok(r).include(Area.class, "id", "parentId", "name", "code",
+                "typeLabel", "sort", "remarks").onlyData();
     }
 
     @AccessLogger("获取地区树")
@@ -146,8 +149,8 @@ public class AreaRestController extends GenericController implements MessageCons
             areaService.updateSort(updates);
             return ResponseMessage.ok(SAVE_SUCCESS);
         } catch (Exception e) {
-            logger.error("Save menu sort faild!", e);
-            throw new ChildNodeExistsException();
+            logger.error("Save area sort faild!", e);
+            return ResponseMessage.error(SAVE_FAILD);
         }
     }
 }
