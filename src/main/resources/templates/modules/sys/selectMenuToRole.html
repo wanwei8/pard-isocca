@@ -37,11 +37,6 @@
                         } else {
                             err(data.message);
                         }
-                    },
-                    error: function (request, textStatus, errorThrow) {
-                        closeLoading();
-                        err("提交服务器失败");
-                        return false;
                     }
                 });
             },

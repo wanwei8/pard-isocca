@@ -20,7 +20,8 @@
     <div class="col-xs-12">
         <div class="row">
             <div class="col-xs-12">
-                <form id="searchForm" class="breadcrumb form-inline" method="post">
+                <form id="searchForm" class="breadcrumb form-inline" method="post"
+                      sec:authorize="hasAuthority('sys:dict:view')">
                     <div class="form-group">
                         <label for="type">类型:</label>
                         <select id="type" name="type" class="form-control select2" style="width:160px;">
@@ -108,74 +109,37 @@
                 }, {
                     'data': null,
                     'title': '操作',
-                    'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
-                    makeTableEditSmbtn() +
-                    makeTableDelSmbtn() +
-                    makeTableAddSmbtn('添加键值') +
-                    '</div>',
+                    'defaultContent': '<div class="btn-group" ></div>',
                     'orderable': false,
                     'width': 130
                 },
-            ],
-            'initComplete': function () {
-                $("div .toolbar").html('<div class="btn-group">' +
-                    createToolbarAddBtn() +
-                    createToolbarRefBtn() +
-                    '</div>'
-                );
-            }
+            ]
+        }).on('draw.dt', function () {
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_view'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_edit'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_del'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_add'));
+        }).on('init.dt', function () {
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_add'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_refresh'));
         });
-        $('#tbl tbody').on('click', 'a#viewrow', view);
-        $('#tbl tbody').on('click', 'a#editrow', edit);
-        $('#tbl tbody').on('click', 'a#addrow', child);
-        $('#tbl tbody').on('click', 'a#delrow', del);
+        if ($('#datatables_button_view').length > 0)
+            $('#tbl tbody').on('click', 'a#viewrow', view);
+        if ($('#datatables_button_edit').length > 0)
+            $('#tbl tbody').on('click', 'a#editrow', edit);
+        if ($('#datatables_button_add').length > 0)
+            $('#tbl tbody').on('click', 'a#addrow', child);
+        if ($('#datatables_button_del').length > 0)
+            $('#tbl tbody').on('click', 'a#delrow', del);
     }
+
 </script>
-<script type="text/javascript">
-    <![CDATA[
-    function add() {
-        openDialog("新增字典", dictFormUrl, "800px", "500px", refresh);
-    }
+<script type="text/javascript" sec:authorize="hasAuthority('sys:dict:view')">
     function view() {
         var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
         var url = dictFormUrl + '?id=' + data.id;
         openDialogView('查看字典', url, '800px', '500px')
     }
-    function edit() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = dictFormUrl + '?id=' + data.id;
-        openDialog('修改字典', url, '800px', '500px', refresh)
-    }
-    function child() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = dictFormUrl + '?type=' + data.type + '&description=' + encodeURI(data.description);
-        openDialog("添加键值", url, "800px", "500px", refresh);
-    }
-    function del() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = ctxApi + '/sys/dict/' + data.id;
-        confirmx('确认要删除该字典码？', function () {
-            loading();
-            $.ajax({
-                url: url,
-                type: "DELETE",
-                dataType: "json",
-                success: function (data) {
-                    if (data.success) {
-                        closeLoading();
-                        msg(data.message);
-                        refresh();
-                    } else {
-                        err(data.message);
-                    }
-                },
-                error: function (request, textStatus, errorThrow) {
-                    err("提交服务器失败");
-                }
-            });
-        });
-    }
-
     function refreshTypeSelect() {
         var url = ctxApi + "/sys/dict/type";
         bindSelect('type', url, '', true);
@@ -206,6 +170,51 @@
         refreshTypeSelect();
         $('#tbl').DataTable().ajax.reload();
     }
-    ]]>
 </script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:dict:add')">
+    function add() {
+        openDialog("新增字典", dictFormUrl, "800px", "500px", refresh);
+    }
+    function child() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = dictFormUrl + '?type=' + data.type + '&description=' + encodeURI(data.description);
+        openDialog("添加键值", url, "800px", "500px", refresh);
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:dict:edit')">
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = dictFormUrl + '?id=' + data.id;
+        openDialog('修改字典', url, '800px', '500px', refresh)
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:dict:del')">
+    function del() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxApi + '/sys/dict/' + data.id;
+        confirmx('确认要删除该字典码？', function () {
+            loading();
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                dataType: "json",
+                success: function (data) {
+                    if (data.success) {
+                        closeLoading();
+                        msg(data.message);
+                        refresh();
+                    } else {
+                        err(data.message);
+                    }
+                }
+            });
+        });
+    }
+</script>
+<th:block th:replace="include/ajax_template :: toolbar_button_refresh" sec:authorize="hasAuthority('sys:dict:view')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_add" sec:authorize="hasAuthority('sys:dict:add')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_view" sec:authorize="hasAuthority('sys:dict:view')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_edit" sec:authorize="hasAuthority('sys:dict:edit')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_del" sec:authorize="hasAuthority('sys:dict:del')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_add" sec:authorize="hasAuthority('sys:dict:add')"/>
 </html>

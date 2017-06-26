@@ -5,6 +5,7 @@ import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Menu;
 import com.pard.modules.sys.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -37,11 +38,13 @@ public class MenuController extends GenericController {
         return menu;
     }
 
+    @PreAuthorize("hasAuthority('sys:menu:view')")
     @RequestMapping(value = {"", "list"})
     public String list(Model model) {
         return "modules/sys/menuList";
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:menu:view', 'sys:menu:add', 'sys:menu:edit')")
     @RequestMapping(value = "form")
     public String form(Menu menu, Model model) {
         model.addAttribute("menu", menu);

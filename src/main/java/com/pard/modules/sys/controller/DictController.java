@@ -31,13 +31,13 @@ public class DictController extends GenericController {
         return new Dict();
     }
 
-    @PreAuthorize("authenticated and hasAuthority('sys:dict:view')")
+    @PreAuthorize("hasAuthority('sys:dict:view')")
     @RequestMapping(value = {"list", ""})
     public String list(Model model) {
         return "modules/sys/dictList";
     }
 
-    @PreAuthorize("authenticated and hasAnyAuthority('sys:dict:view','sys:dict:add','sys:dict:edit')")
+    @PreAuthorize("hasAnyAuthority('sys:dict:view', 'sys:dict:add', 'sys:dict:edit')")
     @RequestMapping(value = "form")
     public String form(Dict dict, Model model) {
         if (StringUtils.isBlank(dict.getId()) && StringUtils.isNotBlank(dict.getType())) {

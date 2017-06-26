@@ -18,6 +18,9 @@ import com.pard.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,6 +37,8 @@ public class RoleRestController extends GenericController implements MessageCons
     private RoleService roleService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     @ModelAttribute
     public Role get(@RequestParam(required = false) String id) {
@@ -49,6 +54,7 @@ public class RoleRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:role:view')")
     @RequestMapping(value = "page", method = RequestMethod.GET)
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
         DataTableResponse<Role> rst = roleService.findAllRole(input);
@@ -57,12 +63,11 @@ public class RoleRestController extends GenericController implements MessageCons
         return message.onlyData();
     }
 
+    @PreAuthorize("authenticated")
     @RequestMapping(value = "tree", method = RequestMethod.GET)
     public ResponseMessage findWithTree() {
-        List<Role> roles = roleService.findAll();
         List<JsTree> r = Lists.newArrayList();
-
-        roles.forEach(role -> {
+        Lists.newArrayList(roleService.findAll()).forEach(role -> {
             JsTree tree = new JsTree();
             tree.setParent("#");
             tree.setId(role.getId());
@@ -74,6 +79,7 @@ public class RoleRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(r).onlyData();
     }
 
+    @PreAuthorize("authenticated")
     @RequestMapping(value = "checkName", method = RequestMethod.GET)
     public ResponseMessage checkName(String oldName, String name) {
         if (name != null && name.equals(oldName)) {
@@ -84,6 +90,7 @@ public class RoleRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(false).onlyData();
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:role:add', 'sys:role:edit')")
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseMessage save(Role role) {
         try {
@@ -103,6 +110,7 @@ public class RoleRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:role:del')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
         try {
@@ -114,6 +122,7 @@ public class RoleRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(DELETE_SUCCESS);
     }
 
+    @PreAuthorize("hasAuthority('sys:role:auth')")
     @RequestMapping(value = "assignmenu", method = RequestMethod.PUT)
     public ResponseMessage assignMenu(Role role, String menuIds) {
         int newNum = 0;
@@ -133,6 +142,7 @@ public class RoleRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "roleuser", method = RequestMethod.GET)
     public ResponseMessage getUsersByRole(@RequestParam(value = "roleid") String id, @Valid DataTableRequest input) {
         PageRequest pageRequest = new PageRequest(input.getStart(), input.getLength());
@@ -146,6 +156,7 @@ public class RoleRestController extends GenericController implements MessageCons
                 "officeName", "loginName", "name").onlyData();
     }
 
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "assignrole", method = RequestMethod.POST)
     public ResponseMessage assignRole(Role role, String[] idsArr) {
         int newNum = 0;
@@ -160,6 +171,7 @@ public class RoleRestController extends GenericController implements MessageCons
         return ResponseMessage.ok("已成功分配 " + newNum + " 个用户");
     }
 
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "/outrole/{role}/{user}", method = RequestMethod.DELETE)
     public ResponseMessage outRole(@PathVariable(name = "role") Role role, @PathVariable(name = "user") String userId) {
         if (!UserUtils.getUser().isAdmin() && UserUtils.getUser().getId().equals(userId)) {
@@ -180,6 +192,7 @@ public class RoleRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "userrole", method = RequestMethod.GET)
     public ResponseMessage getRolesByUser(@RequestParam(value = "userid") String id, @Valid DataTableRequest input) {
         PageRequest pageRequest = new PageRequest(input.getStart(), input.getLength());
@@ -193,6 +206,7 @@ public class RoleRestController extends GenericController implements MessageCons
                 "officeName", "name").onlyData();
     }
 
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "/office/{id}", method = RequestMethod.GET)
     public ResponseMessage getOfficeUser(@PathVariable(name = "id", required = true) String id) {
         List<Role> roles = roleService.findByOffice(id);
@@ -208,5 +222,27 @@ public class RoleRestController extends GenericController implements MessageCons
         });
 
         return ResponseMessage.ok(r).onlyData();
+    }
+
+    /**
+     * 有修改用户的权限,就使session失效
+     *
+     * @param user
+     */
+    private void invalidateSession(User user) {
+        List<Object> o = sessionRegistry.getAllPrincipals();
+        for (Object principal : o) {
+            if (principal instanceof User) {
+                final User loggedUser = (User) principal;
+                if (user.getName().equals(loggedUser.getName())) {
+                    List<SessionInformation> sessionsInfo = sessionRegistry.getAllSessions(principal, false);
+                    if (null != sessionsInfo && sessionsInfo.size() > 0) {
+                        for (SessionInformation sessionInformation : sessionsInfo) {
+                            sessionInformation.expireNow();
+                        }
+                    }
+                }
+            }
+        }
     }
 }

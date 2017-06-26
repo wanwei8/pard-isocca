@@ -5,6 +5,7 @@ import com.pard.common.utils.StringUtils;
 import com.pard.modules.sys.entity.Area;
 import com.pard.modules.sys.service.AreaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -37,11 +38,13 @@ public class AreaController extends GenericController {
         return area;
     }
 
+    @PreAuthorize("hasAuthority('sys:area:view')")
     @RequestMapping(value = {"list", ""})
     public String list(Model model) {
         return "modules/sys/areaList";
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:area:view', 'sys:area:add', 'sys:area:edit')")
     @RequestMapping(value = "form")
     public String form(Area area, Model model) {
         model.addAttribute("area", area);

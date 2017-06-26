@@ -12,6 +12,7 @@ import com.pard.modules.sys.entity.User;
 import com.pard.modules.sys.service.RoleService;
 import com.pard.modules.sys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -57,23 +58,27 @@ public class UserController extends GenericController {
         return user;
     }
 
+    @PreAuthorize("hasAuthority('sys:user:view')")
     @RequestMapping(value = {"list", ""})
     public String list(Model model) {
         return "modules/sys/userList";
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:user:view', 'sys:user:add', 'sys:user:edit')")
     @RequestMapping(value = "form")
     public String form(User user, Model model) {
         model.addAttribute("user", user);
         return "modules/sys/userForm";
     }
 
+    @PreAuthorize("hasAuthority('sys:user:assign')")
     @RequestMapping(value = "assign", method = RequestMethod.GET)
     public String assign(User user, Model model) {
         model.addAttribute("user", user);
         return "modules/sys/userAssign";
     }
 
+    @PreAuthorize("hasAuthority('sys:user:assign')")
     @RequestMapping(value = "roletouser", method = RequestMethod.GET)
     public String selectRoleToUser(User user, Model model) {
         model.addAttribute("user", user);

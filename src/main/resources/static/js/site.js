@@ -2,6 +2,7 @@ $(function () {
     //设置ajax全局错误处理
     $.ajaxSetup({
         error: function (jqXHR, textStatus, errorThrown) {
+            closeLoading();
             switch (jqXHR.status) {
                 case (500):
                     console.log("服务器内部错误");
@@ -11,8 +12,10 @@ $(function () {
                     window.location.href = "/";
                     break;
                 case(403):
-                    console.log("无权限执行此操作");
-                    msg("无权限执行此操作");
+                    //无权限执行此操作
+                    var responseText = jqXHR.responseText;
+                    var rjson = jQuery.parseJSON(responseText);
+                    err(rjson.message);
                     break;
                 case(408):
                     console.log("请求超时");
@@ -47,7 +50,7 @@ function initPageScript() {
             "ordering": true,
             "pageLength": 25,
             "pagingType": "full_numbers",
-            "dom": '<"toolbar"><"pull-right"l>rt<"pull-left"i>p<"clear">',
+            "dom": '<"toolbar"<"btn-group">><"pull-right"l>rt<"pull-left"i>p<"clear">',
             "language": {'url': '/components/dataTables/js/dataTables.lang-zh_CN.json'},
             "stateSave": false,
             "processing": true,
@@ -355,33 +358,41 @@ function makeTableAddButton(title) {
     html += '</a>';
     return html;
 }
-function makeTableViewSmbtn() {
+function makeTableViewSmbtn(bView) {
     var html = '';
-    html += '<a href="javascript:;" class="btn btn-xs btn-success" title="查看" id="viewrow">';
-    html += '<i class="ace-icon glyphicons glyphicons-list-alt bigger-120"></i>';
-    html += '</a>';
+    if (bView == true) {
+        html += '<a href="javascript:;" class="btn btn-xs btn-success" title="查看" id="viewrow">';
+        html += '<i class="ace-icon glyphicons glyphicons-list-alt bigger-120"></i>';
+        html += '</a>';
+    }
     return html;
 }
-function makeTableEditSmbtn() {
+function makeTableEditSmbtn(bEdit) {
     var html = '';
-    html += '<a href="javascript:;" class="btn btn-xs btn-info" title="修改" id="editrow">';
-    html += '<i class="ace-icon glyphicons glyphicons-edit bigger-120"></i>';
-    html += '</a>';
+    if (bEdit == true) {
+        html += '<a href="javascript:;" class="btn btn-xs btn-info" title="修改" id="editrow">';
+        html += '<i class="ace-icon glyphicons glyphicons-edit bigger-120"></i>';
+        html += '</a>';
+    }
     return html
 }
-function makeTableDelSmbtn() {
+function makeTableDelSmbtn(bDel) {
     var html = '';
-    html += '<a href="javascript:;" class="btn btn-xs btn-danger" title="删除" id="delrow">';
-    html += '<i class="ace-icon glyphicons glyphicons-remove-2 bigger-120"></i>';
-    html += '</a>';
+    if (bDel == true) {
+        html += '<a href="javascript:;" class="btn btn-xs btn-danger" title="删除" id="delrow">';
+        html += '<i class="ace-icon glyphicons glyphicons-remove-2 bigger-120"></i>';
+        html += '</a>';
+    }
     return html;
 }
-function makeTableAddSmbtn(title) {
+function makeTableAddSmbtn(title, bAdd) {
     title = title || "添加下级";
     var html = '';
-    html += '<a href="javascript:;" class="btn btn-xs btn-primary" title="' + title + '" id="addrow">';
-    html += '<i class="ace-icon glyphicons glyphicons-plus bigger-120"></i>';
-    html += '</a>';
+    if (bAdd == true) {
+        html += '<a href="javascript:;" class="btn btn-xs btn-primary" title="' + title + '" id="addrow">';
+        html += '<i class="ace-icon glyphicons glyphicons-plus bigger-120"></i>';
+        html += '</a>';
+    }
     return html;
 }
 function makeTableAuthSmbtn() {
@@ -405,28 +416,43 @@ function makeTableAssignSmbtn() {
     html += '</a>';
     return html;
 }
-function createToolbarAddBtn() {
-    var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
-    html += 'data-placement="left" onclick="add()" title="添加">';
-    html += '<i class="ace-icon glyphicons glyphicons-plus"></i>添加';
-    html += '</button>';
-    return html;
+function createToolbarAddBtn(bAdd) {
+    if (bAdd == true) {
+        var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
+        html += 'data-placement="left" onclick="add()" title="添加">';
+        html += '<i class="ace-icon glyphicons glyphicons-plus"></i>添加';
+        html += '</button>';
+        return html;
+    }
+    return '';
 }
-function createToolbarRefBtn() {
-    var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
-    html += 'data-placement="left" onclick="refresh()" title="刷新">';
-    html += '<i class="ace-icon glyphicons glyphicons-refresh"></i>刷新';
-    html += '</button>';
-    return html;
+function createToolbarRefBtn(bView) {
+    if (bView == true) {
+        var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
+        html += 'data-placement="left" onclick="refresh()" title="刷新">';
+        html += '<i class="ace-icon glyphicons glyphicons-refresh"></i>刷新';
+        html += '</button>';
+        return html;
+    }
+    return '';
 }
-function createToolbarSaveSortBtn() {
-    var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
-    html += 'data-placement="left" onclick="updateSort()" title="保存排序">';
-    html += '<i class="ace-icon glyphicons glyphicons-floppy-disk"></i>保存排序';
-    html += '</button>';
-    return html;
+function createToolbarSaveSortBtn(bEdit) {
+    if (bEdit == true) {
+        var html = '<button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" ';
+        html += 'data-placement="left" onclick="updateSort()" title="保存排序">';
+        html += '<i class="ace-icon glyphicons glyphicons-floppy-disk"></i>保存排序';
+        html += '</button>';
+        return html;
+    }
+    return '';
 }
-
+function getHtml(id) {
+    var ctrl = $('#' + id);
+    if (ctrl.length > 0) {
+        return ctrl.html();
+    }
+    return '';
+}
 // 获取URL地址参数
 function getQueryString(name, url) {
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");

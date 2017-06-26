@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -33,23 +35,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     CustomUserDetailsService userDetailsService;
-
     @Autowired
     AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
                 .anyRequest().authenticated()
-                .and().formLogin().usernameParameter("username").passwordParameter("password").loginProcessingUrl("/login").loginPage("/login").permitAll().defaultSuccessUrl("/", true).authenticationDetailsSource(authenticationDetailsSource)
-                .and().logout().logoutUrl("/logout").deleteCookies("JSESSIONID").permitAll()
-                .and().sessionManagement().sessionFixation().migrateSession().maximumSessions(1).expiredUrl("/login?error=expired")
+                .and().formLogin().usernameParameter("username").passwordParameter("password").loginPage("/login").permitAll().defaultSuccessUrl("/", true).authenticationDetailsSource(authenticationDetailsSource)
+                .and().logout().logoutUrl("/logout").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll()
+                .and().sessionManagement().sessionFixation().migrateSession().maximumSessions(1).sessionRegistry(sessionRegistry).expiredUrl("/login?error=expired").and().maximumSessions(1)
                 .and()
                 .and().exceptionHandling().authenticationEntryPoint(ajaxAwareAuthenticationEntryPoint())
-                .and().rememberMe().key("authorition").rememberMeParameter("remember-me").tokenValiditySeconds(604800)
+                .and().rememberMe().key("authorition").rememberMeParameter("remember-me").tokenValiditySeconds(60 * 60 * 24 * 7)
                 .and().headers().frameOptions().sameOrigin()//允许将页面显示在frame中
-                .and()
+                .and().httpBasic()
         ;
 
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
@@ -94,4 +97,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return point;
     }
 
+    @Bean
+    public SessionRegistry getSessionRegistry() {
+        SessionRegistry sessionRegistry = new SessionRegistryImpl();
+        return sessionRegistry;
+    }
 }

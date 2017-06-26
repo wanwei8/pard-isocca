@@ -71,7 +71,7 @@ public class DictRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(result).onlyData();
     }
 
-    @RequestMapping(value = "dict", method = RequestMethod.POST)
+    @RequestMapping(value = "/dict", method = RequestMethod.POST)
     public ResponseMessage findByType(String type) {
         List<Select2> result = Lists.newArrayList();
         List<Dict> dicts = dictService.findByType(type);

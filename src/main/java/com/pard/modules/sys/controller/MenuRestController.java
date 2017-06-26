@@ -1,6 +1,7 @@
 package com.pard.modules.sys.controller;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.pard.common.constant.MessageConstant;
 import com.pard.common.constant.StringConstant;
 import com.pard.common.controller.GenericController;
@@ -21,6 +22,7 @@ import com.pard.modules.sys.service.MenuService;
 import com.pard.modules.sys.utils.UserUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +44,7 @@ public class MenuRestController extends GenericController implements MessageCons
     @Autowired
     private MenuService menuService;
 
+    @PreAuthorize("hasAuthority('sys:menu:view')")
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ResponseMessage getMenuList(@Valid DataTableRequest input) {
         Column column = input.getColumn("parentId");
@@ -59,9 +62,9 @@ public class MenuRestController extends GenericController implements MessageCons
                 "sort", "permission", "icon", "target").onlyData();
     }
 
-    @RequestMapping(value = "select2tree", method = RequestMethod.POST)
+    @RequestMapping(value = "/select2tree", method = RequestMethod.POST)
     public ResponseMessage getSelect2TreeList(@RequestParam(name = "all", defaultValue = "1") int all, String extId) {
-        List<Menu> lst = menuService.findAllMenu();
+        List<Menu> lst = Lists.newArrayList(menuService.findAllMenu());
         List<Select2> r = Lists.newArrayList();
         if (all == 1) {
             Select2 root = new Select2();
@@ -75,7 +78,7 @@ public class MenuRestController extends GenericController implements MessageCons
 
     @RequestMapping(value = "/tree", method = RequestMethod.GET)
     public ResponseMessage getJsTreeList(@RequestParam(name = "all", defaultValue = "0") int all) {
-        List<Menu> lst = menuService.findAllMenu();
+        List<Menu> lst = Lists.newArrayList(menuService.findAllMenu());
         lst.removeIf(new java.util.function.Predicate<Menu>() {
             @Override
             public boolean test(Menu menu) {
@@ -110,7 +113,7 @@ public class MenuRestController extends GenericController implements MessageCons
 
     @RequestMapping(value = "/usermenutree", method = RequestMethod.GET)
     public ResponseMessage getUserMenuTree() {
-        Set<Menu> menus = UserUtils.getUser().getMenus();
+        Set<Menu> menus = Sets.newHashSet(UserUtils.getUser().getMenus());
         List<JsTree> r = Lists.newArrayList();
         for (Menu menu : menus) {
             JsTree tree = new JsTree();
@@ -128,6 +131,7 @@ public class MenuRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(r).onlyData();
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:menu:add', 'sys:menu:edit')")
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseMessage save(Menu menu) {
         try {
@@ -139,6 +143,7 @@ public class MenuRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:menu:savesort')")
     @RequestMapping(value = "sort", method = RequestMethod.POST)
     public ResponseMessage updateSort(String[] ids, Integer[] sorts) {
         if (ids.length != sorts.length) {
@@ -159,6 +164,7 @@ public class MenuRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:menu:del')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
         try {

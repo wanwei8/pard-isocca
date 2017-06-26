@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:remove="tag">
 <head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
     <title>区域管理</title>
     <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
@@ -28,7 +29,7 @@
         </div>
     </div>
 </div>
-<script th:inline="javascript">
+<script th:inline="javascript" type="text/javascript">
     var editFormUrl = ctxAdmin + "/sys/area/form";
     var scripts = [null,
         /*[[@{/components/jstree/jstree.min.js}]]*/ null,
@@ -88,28 +89,29 @@
                 }, {
                     'data': null,
                     'title': '操作',
-                    'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
-                    makeTableEditSmbtn() + makeTableDelSmbtn() + '</div>',
+                    'defaultContent': '<div class="btn-group"></div>',
                     'orderable': false,
                     'width': '100px',
                 },
-            ], 'initComplete': function () {
-                $("div .toolbar").html('<div class="btn-group">' +
-                    createToolbarAddBtn() +
-                    createToolbarSaveSortBtn() +
-                    createToolbarRefBtn() +
-                    '</div>'
-                );
-            }
+            ]
+        }).on('draw.dt', function () {
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_view'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_edit'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_del'));
+        }).on('init.dt', function () {
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_add'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_save_sort'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_refresh'));
         });
-        $('#tbl tbody').on('click', 'a#viewrow', view);
-        $('#tbl tbody').on('click', 'a#editrow', edit);
-        $('#tbl tbody').on('click', 'a#delrow', del);
+        if ($('#datatables_button_view').length > 0)
+            $('#tbl tbody').on('click', 'a#viewrow', view);
+        if ($('#datatables_button_edit').length > 0)
+            $('#tbl tbody').on('click', 'a#editrow', edit);
+        if ($('#datatables_button_del').length > 0)
+            $('#tbl tbody').on('click', 'a#delrow', del);
     }
 </script>
-
-<script type="text/javascript">
-    <![CDATA[
+<script type="text/javascript" sec:authorize="hasAuthority('sys:area:view')">
     function initAreaTreeView(pid) {
         pid = pid || '0';
         var treeUrl = ctxApi + "/sys/area/tree?isall=1";
@@ -140,7 +142,13 @@
             initAreaTreeView();
         }
     }
-
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialogView('查看区域', url, '800px', '500px')
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:area:add')">
     function add() {
         var treeObj = $('#tree').jstree();
         var nodes = treeObj.get_selected();
@@ -151,6 +159,15 @@
         }
         openDialog("新增区域", url, "800px", "500px", initAreaTreeView);
     }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:area:edit')">
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialog("修改区域", url, "800px", "500px", initAreaTreeView);
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:area:del')">
     function del() {
         var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
         var url = ctxApi + '/sys/area/' + data.id;
@@ -168,23 +185,12 @@
                     } else {
                         err(data.message);
                     }
-                },
-                error: function (request, textStatus, errorThrow) {
-                    err("提交服务器失败");
                 }
             });
         });
     }
-    function view() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialogView('查看区域', url, '800px', '500px')
-    }
-    function edit() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialog("修改区域", url, "800px", "500px", initAreaTreeView);
-    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:area:savesort')">
     function updateSort() {
         var url = ctxApi + '/sys/area/sort';
         loading();
@@ -198,6 +204,12 @@
             }
         })
     }
-    ]]>
 </script>
+<th:block th:replace="include/ajax_template :: toolbar_button_refresh" sec:authorize="hasAuthority('sys:area:view')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_add" sec:authorize="hasAuthority('sys:area:add')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_save_sort"
+          sec:authorize="hasAuthority('sys:area:savesort')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_view" sec:authorize="hasAuthority('sys:area:view')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_edit" sec:authorize="hasAuthority('sys:area:edit')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_del" sec:authorize="hasAuthority('sys:area:del')"/>
 </html>

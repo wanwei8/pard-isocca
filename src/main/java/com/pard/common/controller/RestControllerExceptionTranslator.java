@@ -1,11 +1,13 @@
 package com.pard.common.controller;
 
+import com.pard.common.constant.MessageConstant;
 import com.pard.common.exception.*;
 import com.pard.common.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -42,6 +44,13 @@ public class RestControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage handleException(AuthorizeException exception) {
         return ResponseMessage.error(exception.getMessage(), exception.getStatus());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    ResponseMessage handleException(AccessDeniedException exception) {
+        return ResponseMessage.error(MessageConstant.Access_Denied_Exception, 403);
     }
 
     @ExceptionHandler(AuthorizeForbiddenException.class)

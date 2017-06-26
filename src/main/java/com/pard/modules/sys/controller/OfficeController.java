@@ -6,6 +6,7 @@ import com.pard.modules.sys.entity.Area;
 import com.pard.modules.sys.entity.Office;
 import com.pard.modules.sys.service.OfficeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -42,12 +43,13 @@ public class OfficeController extends GenericController {
         return office;
     }
 
+    @PreAuthorize("hasAuthority('sys:office:view')")
     @RequestMapping(value = {"list", ""})
     public String list(Model model) {
         return "modules/sys/officeList";
     }
 
-
+    @PreAuthorize("hasAnyAuthority('sys:office:view', 'sys:office:add', 'sys:office:edit')")
     @RequestMapping(value = "form")
     public String form(Office office, Model model) {
         model.addAttribute("office", office);

@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:remove="tag">
 <head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
     <title>系统角色管理</title>
     <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
@@ -50,7 +51,7 @@
     </div>
 </div>
 
-<script th:inline="javascript">
+<script type="text/javascript" th:inline="javascript">
     var editFormUrl = ctxAdmin + "/sys/role/form";
     var scripts = [null,
         /*[[@{/components/jstree/jstree.min.js}]]*/ null,
@@ -117,35 +118,34 @@
                 }, {
                     'data': null,
                     'title': '操作',
-                    'defaultContent': '<div class="btn-group" >' +
-                    makeTableViewSmbtn() +
-                    makeTableEditSmbtn() +
-                    makeTableDelSmbtn() +
-                    makeTableAuthSmbtn() +
-                    makeTableUserSmbtn() +
-                    '</div>',
+                    'defaultContent': '<div class="btn-group"></div>',
                     'orderable': false,
                     'width': '150px'
                 },
-            ],
-            'initComplete': function () {
-                $("div .toolbar").html('<div class="btn-group">' +
-                    createToolbarAddBtn() +
-                    createToolbarRefBtn() +
-                    '</div>'
-                );
-            }
+            ]
+        }).on('draw.dt', function () {
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_view'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_edit'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_del'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_auth'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_assign_user'));
+        }).on('init.dt', function () {
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_add'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_refresh'));
         });
-
-        $('#tbl tbody').on('click', 'a#viewrow', view);
-        $('#tbl tbody').on('click', 'a#editrow', edit);
-        $('#tbl tbody').on('click', 'a#delrow', del);
-        $('#tbl tbody').on('click', 'a#authrow', auth);
-        $('#tbl tbody').on('click', 'a#userrow', assign);
+        if ($('#datatables_button_view').length > 0)
+            $('#tbl tbody').on('click', 'a#viewrow', view);
+        if ($('#datatables_button_edit').length > 0)
+            $('#tbl tbody').on('click', 'a#editrow', edit);
+        if ($('#datatables_button_del').length > 0)
+            $('#tbl tbody').on('click', 'a#delrow', del);
+        if ($('#datatables_button_auth').length > 0)
+            $('#tbl tbody').on('click', 'a#authrow', auth);
+        if ($('#datatables_button_assign_user').length > 0)
+            $('#tbl tbody').on('click', 'a#assignrow', assign);
     }
 </script>
-<script type="text/javascript">
-    <![CDATA[
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:view')">
     function initTreeView() {
         var treeUrl = ctxApi + "/sys/office/tree";
         bindJstree('treeOffice', treeUrl, false);
@@ -157,59 +157,6 @@
     function refDataTables(oid) {
         var tab = $('#tbl').DataTable();
         tab.columns(1).search(oid).columns(2).search(oid).draw();
-    }
-    function add() {
-        var treeObj = $('#treeOffice').jstree();
-        var nodes = treeObj.get_selected();
-        var url = editFormUrl;
-        if (nodes.length > 0) {
-            url += '?office.id=' + (treeObj.get_node(nodes[0]).id);
-        }
-        openDialog("新增角色信息", url, "800px", "500px", refresh);
-    }
-    function view() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialogView('查看角色信息', url, '800px', '500px')
-    }
-    function edit() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialog("修改角色信息", url, "800px", "500px", refresh);
-    }
-    function del() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = ctxApi + '/sys/role/' + data.id;
-        confirmx('确认要删除该记录码？', function () {
-            loading();
-            $.ajax({
-                url: url,
-                type: "DELETE",
-                dataType: "json",
-                success: function (data) {
-                    closeLoading();
-                    if (data.code == 100) {
-                        msg(data.message);
-                        refresh();
-                    } else {
-                        err(data.message);
-                    }
-                },
-                error: function (request, textStatus, errorThrow) {
-                    err("提交服务器失败");
-                }
-            });
-        });
-    }
-    function auth() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = ctxAdmin + "/sys/role/auth?id=" + data.id;
-        openDialog("权限设置", url, "350px", "700px");
-    }
-    function assign() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = ctxAdmin + "/sys/role/assign?id=" + data.id;
-        openDialogView("分配用户", url, "800px", "600px");
     }
     function refresh() {
         $('#tbl').DataTable().ajax.reload();
@@ -234,5 +181,73 @@
             tab.columns(3).search(name).draw();
         }
     }
-    ]]>
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialogView('查看角色信息', url, '800px', '500px')
+    }
 </script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:add')">
+    function add() {
+        var treeObj = $('#treeOffice').jstree();
+        var nodes = treeObj.get_selected();
+        var url = editFormUrl;
+        if (nodes.length > 0) {
+            url += '?office.id=' + (treeObj.get_node(nodes[0]).id);
+        }
+        openDialog("新增角色信息", url, "800px", "500px", refresh);
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:edit')">
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialog("修改角色信息", url, "800px", "500px", refresh);
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:del')">
+    function del() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxApi + '/sys/role/' + data.id;
+        confirmx('确认要删除该记录码？', function () {
+            loading();
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                dataType: "json",
+                success: function (data) {
+                    closeLoading();
+                    if (data.code == 100) {
+                        msg(data.message);
+                        refresh();
+                    } else {
+                        err(data.message);
+                    }
+                }
+            });
+        });
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:auth')">
+    function auth() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxAdmin + "/sys/role/auth?id=" + data.id;
+        openDialog("权限设置", url, "350px", "700px");
+    }
+</script>
+<script type="text/javascript" sec:authorize="hasAuthority('sys:role:assign')">
+    function assign() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = ctxAdmin + "/sys/role/assign?id=" + data.id;
+        openDialogView("分配用户", url, "800px", "600px");
+    }
+</script>
+<th:block th:replace="include/ajax_template :: toolbar_button_refresh" sec:authorize="hasAuthority('sys:role:view')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_add" sec:authorize="hasAuthority('sys:role:add')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_view" sec:authorize="hasAuthority('sys:role:view')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_edit" sec:authorize="hasAuthority('sys:role:edit')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_del" sec:authorize="hasAuthority('sys:role:del')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_auth" sec:authorize="hasAuthority('sys:role:auth')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_assign_user"
+          sec:authorize="hasAuthority('sys:role:assign')"/>
+</html>

@@ -10,6 +10,7 @@ import com.pard.modules.sys.entity.Office;
 import com.pard.modules.sys.entity.Role;
 import com.pard.modules.sys.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -51,11 +52,13 @@ public class RoleController extends GenericController {
         return role;
     }
 
+    @PreAuthorize("hasAuthority('sys:role:view')")
     @RequestMapping(value = {"list", ""})
     public String list(Model model) {
         return "modules/sys/roleList";
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:role:view', 'sys:role:add', 'sys:role:edit')")
     @RequestMapping(value = "form")
     public String form(Role role, Model model) {
         model.addAttribute("role", role);
@@ -67,6 +70,7 @@ public class RoleController extends GenericController {
      * @param model
      * @return
      */
+    @PreAuthorize("hasAuthority('sys:role:auth')")
     @RequestMapping(value = "auth", method = RequestMethod.GET)
     public String selectMenuToRole(Role role, Model model) {
         model.addAttribute("role", role);
@@ -81,6 +85,7 @@ public class RoleController extends GenericController {
      * @param model
      * @return
      */
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "assign", method = RequestMethod.GET)
     public String assign(Role role, Model model) {
         model.addAttribute("role", role);
@@ -95,6 +100,7 @@ public class RoleController extends GenericController {
      * @param model
      * @return
      */
+    @PreAuthorize("hasAuthority('sys:role:assign')")
     @RequestMapping(value = "usertorole", method = RequestMethod.GET)
     public String selectUserToRole(Role role, Model model) {
         model.addAttribute("role", role);

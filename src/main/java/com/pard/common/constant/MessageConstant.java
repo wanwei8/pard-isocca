@@ -14,4 +14,6 @@ public interface MessageConstant {
     public static final String DELETE_FAILD = "删除失败";
 
     public static final String USERNAME_EXISTS_FAILD = "用户名已存在";
+
+    public static final String Access_Denied_Exception = "无权限执行此操作";
 }

@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:remove="tag">
 <head th:replace="include/ajax_template :: common_header(~{::title},~{::link})">
     <title>菜单管理</title>
     <link rel="stylesheet" th:href="@{/components/jstree/themes/proton/style.min.css}"/>
@@ -36,7 +37,7 @@
         </form>
     </div>
 </div>
-<script th:inline="javascript">
+<script th:inline="javascript" type="text/javascript">
     var editFormUrl = ctxAdmin + "/sys/menu/form";
     var scripts = [null,
         /*[[@{/components/jstree/jstree.min.js}]]*/ null,
@@ -111,28 +112,34 @@
                 }, {
                     'data': null,
                     'title': '操作',
-                    'width': '100px',
-                    'defaultContent': '<div class="btn-group" >' + makeTableViewSmbtn() +
-                    makeTableEditSmbtn() + makeTableDelSmbtn() + '</div>',
+                    'width': '110px',
+                    'defaultContent': '<div class="btn-group" ></div>',
                     'orderable': false,
                 },
-            ], 'initComplete': function () {
-                $("div .toolbar").html('<div class="btn-group">' +
-                    createToolbarAddBtn() +
-                    createToolbarSaveSortBtn() +
-                    createToolbarRefBtn() +
-                    '</div>'
-                );
-            }
+            ]
+        }).on('draw.dt', function () {
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_view'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_edit'));
+            $(".dataTable tbody td .btn-group").append(getHtml('datatables_button_del'));
+        }).on('init.dt', function () {
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_add'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_save_sort'));
+            $("div .toolbar .btn-group").append(getHtml('toolbar_button_refresh'));
         });
-        $('#tbl tbody').on('click', 'a#viewrow', view);
-        $('#tbl tbody').on('click', 'a#editrow', edit);
-        $('#tbl tbody').on('click', 'a#delrow', del);
+        if ($('#datatables_button_view').length > 0)
+            $('#tbl tbody').on('click', 'a#viewrow', view);
+        if ($('#datatables_button_edit').length > 0)
+            $('#tbl tbody').on('click', 'a#editrow', edit);
+        if ($('#datatables_button_del').length > 0)
+            $('#tbl tbody').on('click', 'a#delrow', del);
     }
 </script>
-
-<script type="text/javascript">
-    <![CDATA[
+<script sec:authorize="hasAuthority('sys:menu:view')" type="text/javascript">
+    function view() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialogView('查看菜单', url, '800px', '500px')
+    }
     function initTreeView(pid) {
         pid = pid || '0';
         var treeUrl = ctxApi + "/sys/menu/tree?all=1";
@@ -163,7 +170,8 @@
             initTreeView();
         }
     }
-
+</script>
+<script sec:authorize="hasAuthority('sys:menu:add')" type="text/javascript">
     function add() {
         var treeObj = $('#tree').jstree();
         var nodes = treeObj.get_selected();
@@ -174,6 +182,15 @@
         }
         openDialog("新增菜单", url, "800px", "500px", refreshCurrTreeNode);
     }
+</script>
+<script sec:authorize="hasAuthority('sys:menu:edit')" type="text/javascript">
+    function edit() {
+        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
+        var url = editFormUrl + '?id=' + data.id;
+        openDialog('修改菜单', url, '800px', '500px', initTreeView)
+    }
+</script>
+<script sec:authorize="hasAuthority('sys:menu:del')" type="text/javascript">
     function del() {
         var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
         var url = ctxApi + '/sys/menu/' + data.id;
@@ -191,23 +208,12 @@
                     } else {
                         err(data.message);
                     }
-                },
-                error: function (request, textStatus, errorThrow) {
-                    err("提交服务器失败");
                 }
             });
         });
     }
-    function view() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialogView('查看菜单', url, '800px', '500px')
-    }
-    function edit() {
-        var data = $('#tbl').DataTable().row($(this).parents('tr')).data();
-        var url = editFormUrl + '?id=' + data.id;
-        openDialog('修改菜单', url, '800px', '500px', initTreeView)
-    }
+</script>
+<script sec:authorize="hasAuthority('sys:menu:savesort')" type="text/javascript">
     function updateSort() {
         var url = ctxApi + '/sys/menu/sort';
         loading();
@@ -221,6 +227,12 @@
             }
         });
     }
-    ]]>
 </script>
+<th:block th:replace="include/ajax_template :: toolbar_button_refresh" sec:authorize="hasAuthority('sys:menu:view')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_add" sec:authorize="hasAuthority('sys:menu:add')"/>
+<th:block th:replace="include/ajax_template :: toolbar_button_save_sort"
+          sec:authorize="hasAuthority('sys:menu:savesort')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_view" sec:authorize="hasAuthority('sys:menu:view')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_edit" sec:authorize="hasAuthority('sys:menu:edit')"/>
+<th:block th:replace="include/ajax_template :: datatables_button_del" sec:authorize="hasAuthority('sys:menu:del')"/>
 </html>

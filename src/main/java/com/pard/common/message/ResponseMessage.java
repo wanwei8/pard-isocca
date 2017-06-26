@@ -56,6 +56,11 @@ public class ResponseMessage implements Serializable {
         this.success = false;
     }
 
+    protected ResponseMessage(int code) {
+        this.code = code;
+        this.success = false;
+    }
+
     protected ResponseMessage(boolean success, Object data) {
         this.code = success ? 200 : 500;
         this.data = data;
@@ -92,7 +97,7 @@ public class ResponseMessage implements Serializable {
     }
 
     public static ResponseMessage error(String message, int code) {
-        return new ResponseMessage(message).setCode(code);
+        return new ResponseMessage(code).setMessage(message);
     }
 
     public Map<String, Object> toMap() {
@@ -269,7 +274,8 @@ public class ResponseMessage implements Serializable {
         return message;
     }
 
-    public void setMessage(String message) {
+    public ResponseMessage setMessage(String message) {
         this.message = message;
+        return this;
     }
 }

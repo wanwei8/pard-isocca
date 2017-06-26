@@ -374,13 +374,15 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 转换后的值
      */
     public static int toInt(Object object, int defaultValue) {
-        if (object instanceof Number)
-            return ((Number) object).intValue();
-        if (isInt(object)) {
-            return Integer.parseInt(object.toString());
-        }
-        if (isDouble(object)) {
-            return (int) Double.parseDouble(object.toString());
+        if (object != null) {
+            if (object instanceof Number)
+                return ((Number) object).intValue();
+            if (isInt(object)) {
+                return Integer.parseInt(object.toString());
+            }
+            if (isDouble(object)) {
+                return (int) Double.parseDouble(object.toString());
+            }
         }
         return defaultValue;
     }

@@ -90,7 +90,8 @@ public class LoginController extends GenericController {
 
     @RequestMapping(value = {"/", "/index"})
     public String index(HttpServletRequest request, HttpServletResponse response, Model model) {
-        Set<Menu> menus = Sets.filter(UserUtils.getUser().getMenus(), new Predicate<Menu>() {
+        Set<Menu> userMenus = Sets.newHashSet(UserUtils.getUser().getMenus());
+        Set<Menu> menus = Sets.filter(userMenus, new Predicate<Menu>() {
             @Override
             public boolean apply(Menu menu) {
                 return SHOW.equals(menu.getIsShow());

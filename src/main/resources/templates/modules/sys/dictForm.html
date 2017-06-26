@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="include/dialog_template :: common_header(~{::title},~{::link},~{::style})">
     <title>字典管理</title>
 </head>
@@ -48,7 +49,7 @@
 </div>
 
 <th:block th:replace="include/dialog_template :: javascript"/>
-<script th:inline="javascript">
+<script th:inline="javascript" sec:authorize="hasAnyAuthority('sys:dict:add', 'sys:dict:edit')">
     var validateForm;
     var refershGrid;
     function doSubmit(callback) {
@@ -78,10 +79,6 @@
                         } else {
                             err(data.message);
                         }
-                    },
-                    error: function (request, textStatus, errorThrow) {
-                        closeLoading();
-                        err("提交服务器失败");
                     }
                 })
             },

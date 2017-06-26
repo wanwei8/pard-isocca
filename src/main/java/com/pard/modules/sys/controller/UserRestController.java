@@ -16,6 +16,7 @@ import com.pard.modules.sys.service.RoleService;
 import com.pard.modules.sys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -47,6 +48,7 @@ public class UserRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:user:view')")
     @RequestMapping(value = "page", method = RequestMethod.GET)
     public ResponseMessage findByPage(@Valid DataTableRequest input) {
         DataTableResponse<User> rst = userService.findAllUser(input);
@@ -57,6 +59,7 @@ public class UserRestController extends GenericController implements MessageCons
                 .onlyData();
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:user:add', 'sys:user:edit')")
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseMessage save(User user) {
         try {
@@ -113,6 +116,7 @@ public class UserRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:user:del')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
         try {
@@ -124,6 +128,7 @@ public class UserRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(DELETE_SUCCESS);
     }
 
+    @PreAuthorize("hasAuthority('sys:user:assign')")
     @RequestMapping(value = "/officeuser/{id}", method = RequestMethod.GET)
     public ResponseMessage getOfficeUser(@PathVariable(name = "id", required = true) String id) {
         List<User> users = userService.findByOffice(id);
@@ -141,6 +146,7 @@ public class UserRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(r).onlyData();
     }
 
+    @PreAuthorize("hasAuthority('sys:user:assign')")
     @RequestMapping(value = "assignrole", method = RequestMethod.POST)
     public ResponseMessage assignRole(User user, String[] idsArr) {
         int newNum = 0;

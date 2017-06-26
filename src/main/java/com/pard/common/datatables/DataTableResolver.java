@@ -1,6 +1,7 @@
 package com.pard.common.datatables;
 
 import com.google.common.collect.Maps;
+import com.pard.common.utils.StringUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -23,10 +24,9 @@ public class DataTableResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest request, WebDataBinderFactory factory) throws Exception {
         DataTableRequest dataTableRequest = new DataTableRequest();
-
-        dataTableRequest.setStart(Integer.parseInt(request.getParameter("start")));
-        dataTableRequest.setLength(Integer.parseInt(request.getParameter("length")));
-        dataTableRequest.setDraw(Integer.parseInt(request.getParameter("draw")));
+        dataTableRequest.setStart(StringUtils.toInt(request.getParameter("start"), 0));
+        dataTableRequest.setLength(StringUtils.toInt(request.getParameter("length"), 25));
+        dataTableRequest.setDraw(StringUtils.toInt(request.getParameter("draw"), 1));
 
         int idx = 0;
         Map<String, String[]> parameterMap = request.getParameterMap();

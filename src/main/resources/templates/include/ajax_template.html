@@ -9,4 +9,88 @@
         <th:block th:replace="${links} ?: ~{}"/>
     </head>
 
+    <!--表格工具栏 刷新按钮-->
+    <th:block th:fragment="toolbar_button_refresh">
+        <script type="text/html" id="toolbar_button_refresh">
+            <button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" id="refBtn"
+                    data-placement="left" onclick="refresh()" title="刷新">
+                <i class="ace-icon glyphicons glyphicons-refresh"></i>刷新
+            </button>
+        </script>
+    </th:block>
+    <!--表格工具栏 添加按钮-->
+    <th:block th:fragment="toolbar_button_add">
+        <script type="text/html" id="toolbar_button_add">
+            <button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" id="addBtn"
+                    data-placement="left" onclick="add()" title="添加">
+                <i class="ace-icon glyphicons glyphicons-plus"></i>添加
+            </button>
+        </script>
+    </th:block>
+    <!--表格工具栏 保存排序按钮-->
+    <th:block th:fragment="toolbar_button_save_sort">
+        <script type="text/html" id="toolbar_button_save_sort">
+            <button class="btn btn-white btn-info btn-bold" data-toggle="tooltip" type="button" id="saveSortBtn"
+                    data-placement="left" onclick="updateSort()" title="保存排序">
+                <i class="ace-icon glyphicons glyphicons-floppy-disk"></i>保存排序
+            </button>
+        </script>
+    </th:block>
+
+    <!--表格操作 查看按钮-->
+    <th:block th:fragment="datatables_button_view">
+        <script type="text/html" id="datatables_button_view">
+            <a href="javascript:;" class="btn btn-xs btn-success" title="查看" id="viewrow">
+                <i class="ace-icon glyphicons glyphicons-list-alt bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 编辑按钮-->
+    <th:block th:fragment="datatables_button_edit">
+        <script type="text/html" id="datatables_button_edit">
+            <a href="javascript:;" class="btn btn-xs btn-info" title="修改" id="editrow">
+                <i class="ace-icon glyphicons glyphicons-edit bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 删除按钮-->
+    <th:block th:fragment="datatables_button_del">
+        <script type="text/html" id="datatables_button_del">
+            <a href="javascript:;" class="btn btn-xs btn-danger" title="删除" id="delrow">
+                <i class="ace-icon glyphicons glyphicons-remove-2 bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 新增按钮-->
+    <th:block th:fragment="datatables_button_add">
+        <script type="text/html" id="datatables_button_add">
+            <a href="javascript:;" class="btn btn-xs btn-primary" title="添加" id="addrow">
+                <i class="ace-icon glyphicons glyphicons-plus bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 权限设置按钮-->
+    <th:block th:fragment="datatables_button_auth">
+        <script type="text/html" id="datatables_button_auth">
+            <a href="javascript:;" class="btn btn-xs btn-warning" title="权限设置" id="authrow">
+                <i class="ace-icon glyphicons glyphicons-flowchart bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 分配用户按钮-->
+    <th:block th:fragment="datatables_button_assign_user">
+        <script type="text/html" id="datatables_button_assign_user">
+            <a href="javascript:;" class="btn btn-xs btn-primary" title="分配用户" id="assignrow">
+                <i class="ace-icon glyphicons glyphicons-user bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
+    <!--表格操作 分配角色按钮-->
+    <th:block th:fragment="datatables_button_assign_role">
+        <script type="text/html" id="datatables_button_assign_role">
+            <a href="javascript:;" class="btn btn-xs btn-primary" title="分配角色" id="assignrow">
+                <i class="ace-icon glyphicons glyphicons-group bigger-120"></i>
+            </a>
+        </script>
+    </th:block>
 </thymeleaf>

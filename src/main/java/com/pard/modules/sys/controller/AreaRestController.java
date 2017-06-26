@@ -19,6 +19,7 @@ import com.pard.modules.sys.entity.Dict;
 import com.pard.modules.sys.service.AreaService;
 import com.pard.modules.sys.service.DictService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -37,6 +38,7 @@ public class AreaRestController extends GenericController implements MessageCons
     private DictService dictService;
 
     @AccessLogger("获取地区列表")
+    @PreAuthorize("hasAuthority('sys:area:view')")
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ResponseMessage getAreaList(@Valid DataTableRequest input) {
         Column column = input.getColumn("parentId");
@@ -109,6 +111,7 @@ public class AreaRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(r).onlyData();
     }
 
+    @PreAuthorize("hasAnyAuthority('sys:area:add', 'sys:area:edit')")
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseMessage save(Area area) {
         try {
@@ -120,6 +123,7 @@ public class AreaRestController extends GenericController implements MessageCons
         }
     }
 
+    @PreAuthorize("hasAuthority('sys:area:del')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseMessage delete(@PathVariable(name = "id", required = true) String id) {
         try {
@@ -134,6 +138,7 @@ public class AreaRestController extends GenericController implements MessageCons
         return ResponseMessage.ok(DELETE_SUCCESS);
     }
 
+    @PreAuthorize("hasAuthority('sys:area:savesort')")
     @RequestMapping(value = "sort", method = RequestMethod.POST)
     public ResponseMessage updateSort(String[] ids, Integer[] sorts) {
         if (ids.length != sorts.length) {
